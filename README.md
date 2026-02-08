@@ -1,8 +1,8 @@
-<h2 align="center">
+<h1 align="center">
   <img src="src/contents/icons/com.github.wwmm.easyeffects.svg" alt="Easy Effects icon" width="150" height="150"/>
   <br>
   School_Miner (Eltern-Edition)
-</h2>
+</h1>
 
 <p align="center">
   <a href="https://github.com/sponsors/wwmm">
@@ -18,7 +18,7 @@
 
 Dieses Tool soll Eltern helfen, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, etc.) zu durchsuchen und die pädagogischen Konzepte mittels KI zusammenzufassen.
 
-Installation:
+<h2>Installation:</h2>
 
 1. Repository klonen.
 
@@ -29,6 +29,10 @@ Installation:
 4. schulen.xlsx mit den Spalten Name und Ort anlegen.
 
 5. python school_miner.py starten.
+
+<h2>Hinweise zur Nutzung</h2>
+
+Das Skript erstellt automatisch eine config.json-Datei. Dort wird unter anderem eine Keywordliste gespeichert. Wie erfolgreich das Suche nach der richtigen Schule ist, hängt nicht zuletzt von der Qualität dieser Keywords ab.
 
 ## License
 
