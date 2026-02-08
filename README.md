@@ -37,4 +37,4 @@ Das Skript erstellt automatisch eine config.json-Datei. Dort wird unter anderem 
 ## License
 
 School_miner ist unter der GNU General Public License, Version 3 or folgende, lizensiert.
-Hier die [Lizenz](https://github.com/wiemachendiedasnur/school_miner/main/LICENSE).
+Hier die [Lizenz](https://github.com/wiemachendiedasnur/school_miner/blob/main/LICENSE).
