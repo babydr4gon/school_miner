@@ -8,7 +8,7 @@
   <a href="https://github.com/sponsors/wwmm">
     <img alt="GitHub Sponsors donation button" src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&link=https://github.com/sponsors/wwmm">
   </a>
-  <a href="https://liberapay.com/wwmm/donate">
+  <a href="https://liberapay.com/Gernot_Sell/donate">
     <img alt="Liberapay donation button" src="https://img.shields.io/badge/liberapay-donate-green">
   </a>
   <a href="https://www.patreon.com/wellingtonwallace?fan_landing=true">
