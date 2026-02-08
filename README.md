@@ -11,11 +11,8 @@
   <a href="https://liberapay.com/Gernot_Sell/donate">
     <img alt="Liberapay donation button" src="https://img.shields.io/badge/liberapay-donate-green">
   </a>
-  <a href="https://www.patreon.com/wellingtonwallace?fan_landing=true">
+  <a href="https://www.patreon.com/gernotsell?fan_landing=true">
     <img alt="Patreon donation button" src="https://img.shields.io/badge/patreon-donate-green.svg">
-  </a>
-  <a href="https://www.paypal.com/donate?hosted_button_id=RK723F4EKH2UE">
-    <img alt="PayPal donation button" src="https://img.shields.io/badge/paypal-donate-green.svg">
   </a>
 </p>
 
