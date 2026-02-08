@@ -1,16 +1,15 @@
-# school_miner
-Ein interaktiver Schul-Scanner (Eltern-Edition)
+Schul-Scanner (Eltern-Edition)
 
 Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, etc.) zu durchsuchen und die pädagogischen Konzepte mittels KI zusammenzufassen.
 
 Installation:
 
-Repository klonen.
+1. Repository klonen.
 
-pip install -r requirements.txt ausführen.
+2. pip install -r requirements.txt ausführen.
 
-.env Datei erstellen und API-Keys eintragen (z.B. OPENROUTER_API_KEY=...).
+3. .env Datei erstellen und API-Keys eintragen (z.B. OPENROUTER_API_KEY=...).
 
-schulen.xlsx mit den Spalten Name und Ort anlegen.
+4. schulen.xlsx mit den Spalten Name und Ort anlegen.
 
-python school_miner.py starten.
+5. python school_miner.py starten.
