@@ -34,7 +34,9 @@ Dieses Tool soll Eltern helfen, Schulwebseiten automatisch nach Keywords (MINT, 
 
 <h1>Allgemeines</h1>
 
-Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden. Das Skript erwartet standardmäßig eine Datei mit dem Namen „schulen.xlsx“, die im gleichen Verzeichnis liegt. Dies kann man aber unter Einstellungen auch individuell verändern.
+Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden. 
+
+Das Skript erwartet standardmäßig eine Datei mit dem Namen „schulen.xlsx“, die im gleichen Verzeichnis liegt. Dies kann man aber unter Einstellungen auch individuell verändern.
 
 Anschließend sucht das Skript für jede der Schulen in dieser Liste nach der offiziellen Webseite. Dort sucht es nach dem Schultyp und nach bestimmten Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
 
