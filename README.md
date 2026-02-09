@@ -45,19 +45,23 @@ Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkart
 <h1>Start des Skripts</h1>
 
 Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
-1. AutoScan: die vorbereitete Liste der Schulen, über die man mehr wissen möchte, wird automatisch, Zeile für Zeile abgearbeitet.<br>
+<ol>
+  
 
-2. Manuelle Kontrolle: Das Skript geht Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder neu suchen lassen.<br>
+<li>AutoScan: die vorbereitete Liste der Schulen, über die man mehr wissen möchte, wird automatisch, Zeile für Zeile abgearbeitet.</li>
 
-3. Einzelne Zeile: Hier kann der Nutzer gezielt eine einzelne Schule aus der Ergebnisliste auswählen, wenn er mit dem Suchergebnis zu dieser Schule unzufrieden ist.<br>
+<li>Manuelle Kontrolle: Das Skript geht Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder neu suchen lassen.</li>
 
-4. Karte: Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule aus der Ergebnisliste.<br>
+<li>Einzelne Zeile: Hier kann der Nutzer gezielt eine einzelne Schule aus der Ergebnisliste auswählen, wenn er mit dem Suchergebnis zu dieser Schule unzufrieden ist.</li>
 
-5: Sync: Das Skript überprüft manuell, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.<br>
+<li>Karte: Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule aus der Ergebnisliste.</li>
 
-6: Settings: Hier kann man die Grundeinstellungen verändern. <br>
+<li>Sync: Das Skript überprüft manuell, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.</li>
 
-7: Exit: Beenden des Skripts.<br>
+<li>Settings: Hier kann man die Grundeinstellungen verändern.</li>
+
+<li>Exit: Beenden des Skripts.
+</ol>
 
 <h1>Einstellungen</h1>
 
@@ -66,4 +70,4 @@ Das Skript erstellt automatisch eine config.json-Datei. Alle Einstellungen, die 
 In der config.json-Datei wird unter anderem eine Keywordliste gespeichert. Wie erfolgreich das Suche nach der richtigen Schule ist, hängt nicht zuletzt von der Qualität dieser Keywords ab. Außerdem befinden sich hier die verschiedenen Schultypen und der Prompt für die KI.
 
 <h1>Lizenz</h1>
-Diese Softare steht unter der GNU GPL v3.0 Lizenz](https://github.com/wiemachendiedasnur/school_miner/blob/main/LICENSE).
+Diese Softare steht unter der GNU GPL v3.0 <a href="https://github.com/wiemachendiedasnur/school_miner/blob/main/LICENSE">Lizenz</a>.
