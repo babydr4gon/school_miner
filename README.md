@@ -1,7 +1,7 @@
 <h1 align="center">
-  <img src="src/contents/icons/com.github.wwmm.easyeffects.svg" alt="Easy Effects icon" width="150" height="150"/>
+  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/dragon_mine.png" alt="School_miner icon" width="250" height="250"/>
   <br>
-  School_Miner (Eltern-Edition)
+  School_Miner
 </h1>
 
 <p align="center">
