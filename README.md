@@ -18,7 +18,7 @@
 
 Dieses Tool soll Eltern helfen, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, etc.) zu durchsuchen und die pädagogischen Konzepte mittels KI zusammenzufassen.
 
-<h2>Installation:</h2>
+<h1>Installation:</h1>
 
 1. Repository klonen.
 
@@ -30,9 +30,9 @@ Dieses Tool soll Eltern helfen, Schulwebseiten automatisch nach Keywords (MINT, 
 
 5. python school_miner.py starten.
 
-<h2>Features</h2>
+<h1>Features</h1>
 
-<h1>Allgemeines</h1>
+<h3>Allgemeines</h3>
 
 Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden. 
 
@@ -46,7 +46,7 @@ Das Skript erstellt eine Tabelle mit den Ergebnissen der Suche. Darin sind der N
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
 
-<h1>Start des Skripts</h1>
+<h3>Start des Skripts</h3>
 
 Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 <ol>
@@ -68,7 +68,7 @@ Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesa
 <li>Exit: Beenden des Skripts.
 </ol>
 
-<h1>Einstellungen</h1>
+<h3>Einstellungen</h3>
 
 Das Skript erstellt automatisch eine config.json-Datei. Alle Einstellungen, die man darin vornimmt, überschreiben die Standardeinstellungen im Skript. Es lohnt sich also, hier etwas Zeit und Mühe zu investieren. 
 
@@ -76,5 +76,5 @@ Das Skript erstellt automatisch eine config.json-Datei. Alle Einstellungen, die 
 
 In der config.json-Datei wird unter anderem eine Keywordliste gespeichert. Wie erfolgreich das Suche nach der richtigen Schule ist, hängt nicht zuletzt von der Qualität dieser Keywords ab. Außerdem befinden sich hier die verschiedenen Schultypen und der Prompt für die KI.
 
-<h1>Lizenz</h1>
+<h3>Lizenz</h3>
 Diese Softare steht unter der GNU GPL v3.0 <a href="https://github.com/wiemachendiedasnur/school_miner/blob/main/LICENSE">Lizenz</a>.
