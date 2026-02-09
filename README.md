@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/dragon_mine.png" alt="School_miner icon" width="250" height="250"/>
+  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/dragon_mine.png" alt="School_miner icon" width="300" height="300"/>
   <br>
   School_Miner
 </h1>
@@ -40,13 +40,16 @@ Anschließend sucht das Skript für jede der Schulen in dieser Liste nach der of
 
 Das Skript erstellt eine Tabelle mit den Ergebnissen der Suche. Darin sind der Name der Schule, die gefundenen Keywords, die verwendete Webseite und die Zusammenfassung der KI gespeichert. Es gibt die Möglichkeit, Fehler, die bei der automatisierten Suche passieren, individuell zu korrigieren. 
 
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Schulübersicht.jpg" alt="Landkarte" width="450" height="450"/>
+
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
 
 <h1>Start des Skripts</h1>
 
 Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 <ol>
-  
+
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Hauptmenü.jpg" alt="Hauptmenü" width="450" height="450"/>
 
 <li>AutoScan: die vorbereitete Liste der Schulen, über die man mehr wissen möchte, wird automatisch, Zeile für Zeile abgearbeitet.</li>
 
@@ -66,6 +69,8 @@ Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesa
 <h1>Einstellungen</h1>
 
 Das Skript erstellt automatisch eine config.json-Datei. Alle Einstellungen, die man darin vornimmt, überschreiben die Standardeinstellungen im Skript. Es lohnt sich also, hier etwas Zeit und Mühe zu investieren. 
+
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Einstellungen.jpg" alt="Einstellungen" width="550" height="450"/>
 
 In der config.json-Datei wird unter anderem eine Keywordliste gespeichert. Wie erfolgreich das Suche nach der richtigen Schule ist, hängt nicht zuletzt von der Qualität dieser Keywords ab. Außerdem befinden sich hier die verschiedenen Schultypen und der Prompt für die KI.
 
