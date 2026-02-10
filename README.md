@@ -20,24 +20,17 @@ Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganzta
 1. **Repository klonen** oder als ZIP herunterladen und entpacken.
 
 2. **Abhängigkeiten installieren:**
-   Öffne ein Terminal im Ordner und führe aus:
+   
    ```bash
    pip install -r requirements.txt
 
-3. API-Keys hinterlegen: Erstelle eine Datei namens .env im gleichen Ordner und trage deine Schlüssel ein (je nachdem, was du nutzen möchtest):
+3. API-Keys in einer Datei namens .env im gleichen Ordner hinterlegen. Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
    ```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
 
-Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
+4. Schulliste anlegen: Erstelle eine Datei schulen.xlsx. Das Skript erwartet in Spalte A den Namen der Schule und in Spalte C den Ort der Schule.  Wenn diese Daten in anderen Spalten stehen, lässt sich das in den Einstellungen später anpassen.
 
-4. Schulliste anlegen: Erstelle eine Datei schulen.xlsx.
-   
-   Spalte A: Name der Schule
-   Spalte C: Ort der Schule 
-
-Wenn deine Daten in anderen Spalten stehen, kannst du das später in den Einstellungen unter config.json anpassen.
-
-6. Starten
+5. Starten
    ```bash
    python school_miner.py
 
