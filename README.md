@@ -5,9 +5,6 @@
 </h1>
 
 <p align="center">
-  <a href="https://github.com/sponsors/wwmm">
-    <img alt="GitHub Sponsors donation button" src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&link=https://github.com/sponsors/wwmm">
-  </a>
   <a href="https://liberapay.com/Gernot_Sell/donate">
     <img alt="Liberapay donation button" src="https://img.shields.io/badge/liberapay-donate-green">
   </a>
@@ -16,31 +13,45 @@
   </a>
 </p>
 
-Dieses Tool soll Eltern helfen, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, etc.) zu durchsuchen und die pädagogischen Konzepte mittels KI zusammenzufassen.
+Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, Montessori, etc.) zu durchsuchen und die pädagogischen Konzepte mittels KI zusammenzufassen.
 
-<h1>Installation:</h1>
+<h1>Installation</h1>
 
-1. Repository klonen.
+1. **Repository klonen** oder als ZIP herunterladen und entpacken.
 
-2. pip install -r requirements.txt ausführen.
+2. **Abhängigkeiten installieren:**
+   Öffne ein Terminal im Ordner und führe aus:
+   ```bash
+   pip install -r requirements.txt
 
-3. .env Datei erstellen und API-Keys eintragen (z.B. OPENROUTER_API_KEY=...).
+3. API-Keys hinterlegen: Erstelle eine Datei namens .env im gleichen Ordner und trage deine Schlüssel ein (je nachdem, was du nutzen möchtest):
+   ```bash
+   OPENROUTER_API_KEY=dein_schluessel_hier
 
-4. Eine Datei „schulen.xlsx „mit den Spalten Name und Ort als Grundlage für die Suche anlegen.
+Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
 
-5. python school_miner.py starten.
+4. Schulliste anlegen: Erstelle eine Datei schulen.xlsx.
+   
+   Spalte A: Name der Schule
+   Spalte C: Ort der Schule 
+
+Wenn deine Daten in anderen Spalten stehen, kannst du das später in den Einstellungen unter config.json anpassen.
+
+6. Starten
+   ```bash
+   python school_miner.py
 
 <h1>Features</h1>
 
 <h3>Allgemeines</h3>
 
-Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden. 
+Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden.
 
-Das Skript erwartet standardmäßig eine Datei mit dem Namen „schulen.xlsx“, die im gleichen Verzeichnis liegt. Dies kann man aber unter Einstellungen auch individuell verändern.
+Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, rauslöschen und den Rest für die Suche speichern. Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. Wie auch immer: diese Liste bildet die Basis. 
 
-Anschließend sucht das Skript für jede der Schulen in dieser Liste nach der offiziellen Webseite. Dort sucht es nach dem Schultyp und nach bestimmten Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
+Das Skript sucht für jede der Schulen in dieser Liste nach der offiziellen Webseite. Dort identifiziert es den Schultyp und sucht nach bestimmten Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
 
-Das Skript erstellt eine Tabelle mit den Ergebnissen der Suche. Darin sind der Name der Schule, die gefundenen Keywords, die verwendete Webseite und die Zusammenfassung der KI gespeichert. Es gibt die Möglichkeit, Fehler, die bei der automatisierten Suche passieren, individuell zu korrigieren. 
+Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen der Name und der Ort der Schule, die gefundenen Keywords, die verwendete Webseite und die Zusammenfassung der KI. Es gibt die Möglichkeit, Fehler, die bei der automatisierten Suche passieren, individuell zu korrigieren. 
 
 <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Schulübersicht.jpg" alt="Landkarte" width="450" height="450"/>
 
@@ -51,30 +62,38 @@ Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkart
 Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 <ol>
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Hauptmenü.jpg" alt="Hauptmenü" width="450" height="450"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Start.jpg" alt="Hauptmenü" width="450" height="450"/>
 
-<li>AutoScan: die vorbereitete Liste der Schulen, über die man mehr wissen möchte, wird automatisch, Zeile für Zeile abgearbeitet.</li>
+<li>AutoScan: die vorbereitete Liste der Schulen wird automatisch, Zeile für Zeile abgearbeitet.</li>
 
-<li>Manuelle Kontrolle: Das Skript geht Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder neu suchen lassen.</li>
+<li>Manuelle Kontrolle: Das Skript geht noch einmal Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder neu suchen lassen.</li>
 
 <li>Einzelne Zeile: Hier kann der Nutzer gezielt eine einzelne Schule aus der Ergebnisliste auswählen, wenn er mit dem Suchergebnis zu dieser Schule unzufrieden ist.</li>
 
-<li>Karte: Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule aus der Ergebnisliste.</li>
+<li>Karte erstellen: Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule auf der Basis der Ergebnisliste.</li>
 
-<li>Sync: Das Skript überprüft manuell, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.</li>
+<li>Sync mit Input-Datei: Das Skript überprüft manuell, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.</li>
 
-<li>Settings: Hier kann man die Grundeinstellungen verändern.</li>
+<li>Einstellungen: Hier kann man die Grundeinstellungen verändern.</li>
 
-<li>Exit: Beenden des Skripts.
+<li>Beenden: Beenden des Skripts.
 </ol>
 
 <h3>Einstellungen</h3>
 
 Das Skript erstellt automatisch eine config.json-Datei. Alle Einstellungen, die man darin vornimmt, überschreiben die Standardeinstellungen im Skript. Es lohnt sich also, hier etwas Zeit und Mühe zu investieren. 
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Einstellungen.jpg" alt="Einstellungen" width="550" height="450"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Settings.jpg" alt="Einstellungen" width="550" height="450"/>
 
 In der config.json-Datei wird unter anderem eine Keywordliste gespeichert. Wie erfolgreich das Suche nach der richtigen Schule ist, hängt nicht zuletzt von der Qualität dieser Keywords ab. Außerdem befinden sich hier die verschiedenen Schultypen und der Prompt für die KI.
+
+Das Skript erwartet als Input-Datei standardmäßig eine Datei mit dem Namen „schulen.xlsx“, die im gleichen Verzeichnis liegt. 
+
+Mit der Sensibilität stellt man ein, wie streng das Skript bei der Kontrolle der gefundenen Webseiten sein soll. Im Modus "Normal" wird nur geschaut, ob Name und Ort der Schule auf der gefundenen Webseite stehen. Das kann in Einzelfällen dazu führen, dass eine völlig falsche Webseite als Grundlage für die Suche genommen wird, nur weil dort zufällig Name und Ort der Schule genannt werden (Stayfriends, Wikipedia, etc.). 
+
+Im Modus "strict" werden weitere Bedingungen genannt, damit eine Webseite als offizielle Webseite der Schule angenommen und gegebenenfalls von der KI ausgewertet wird. 
+
+Die KI-Priorität regelt, in welcher Reihenfolge einzelne KI-Anbieter angesprochen werden. Werden keine KI-API-Keys definiert, läuft das Skript trotzdem weiter - es gibt dann eben keine KI-generierten Zusammenfassungen.
 
 <h3>Lizenz</h3>
 Diese Softare steht unter der GNU GPL v3.0 <a href="https://github.com/wiemachendiedasnur/school_miner/blob/main/LICENSE">Lizenz</a>.
