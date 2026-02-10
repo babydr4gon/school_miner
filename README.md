@@ -34,28 +34,28 @@ Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganzta
    ```bash
    python school_miner.py
 
-<h1>Features</h1>
+<h1>Nutzung</h1>
 
-<h3>Allgemeines</h3>
+<h3>Die Basis: eine Liste mit Schulen</h3>
 
 Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden.
 
-Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, rauslöschen und den Rest für die Suche speichern. Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. Wie auch immer: diese Liste bildet die Basis. 
+Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, rauslöschen und den Rest für die Suche speichern. Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. Wie auch immer: diese Liste bildet die Basis. Voreingestellt ist als Name für diese Liste schulen.xlsx.
 
-Das Skript sucht für jede der Schulen in dieser Liste nach der offiziellen Webseite. Dort identifiziert es den Schultyp und sucht nach bestimmten Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
+Das Skript wird für jede der Schulen in dieser Liste nach der offiziellen Webseite suchen. Dort identifiziert es den Schultyp und erkennt bestimmte Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
 
 Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen der Name und der Ort der Schule, die gefundenen Keywords, die verwendete Webseite und die Zusammenfassung der KI. Es gibt die Möglichkeit, Fehler, die bei der automatisierten Suche passieren, individuell zu korrigieren. 
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Schulübersicht.jpg" alt="Landkarte" width="450" height="450"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Schulübersicht.jpg" alt="Landkarte" width="650" height="650"/>
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
 
-<h3>Start des Skripts</h3>
+<h3>Vom AutoScan zur Landkartes</h3>
 
 Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 <ol>
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Start.jpg" alt="Hauptmenü" width="450" height="450"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Start.jpg" alt="Hauptmenü" width="650" height="650"/>
 
 <li>AutoScan: die vorbereitete Liste der Schulen wird automatisch, Zeile für Zeile abgearbeitet.</li>
 
@@ -72,11 +72,11 @@ Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesa
 <li>Beenden: Beenden des Skripts.
 </ol>
 
-<h3>Einstellungen</h3>
+<h3>Die Einstellungen</h3>
 
 Das Skript erstellt automatisch eine config.json-Datei. Alle Einstellungen, die man darin vornimmt, überschreiben die Standardeinstellungen im Skript. Es lohnt sich also, hier etwas Zeit und Mühe zu investieren. 
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Settings.jpg" alt="Einstellungen" width="550" height="450"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Settings.jpg" alt="Einstellungen" width="650" height="650"/>
 
 In der config.json-Datei wird unter anderem eine Keywordliste gespeichert. Wie erfolgreich das Suche nach der richtigen Schule ist, hängt nicht zuletzt von der Qualität dieser Keywords ab. Außerdem befinden sich hier die verschiedenen Schultypen und der Prompt für die KI.
 
@@ -88,5 +88,3 @@ Im Modus "strict" werden weitere Bedingungen genannt, damit eine Webseite als of
 
 Die KI-Priorität regelt, in welcher Reihenfolge einzelne KI-Anbieter angesprochen werden. Werden keine KI-API-Keys definiert, läuft das Skript trotzdem weiter - es gibt dann eben keine KI-generierten Zusammenfassungen.
 
-<h3>Lizenz</h3>
-Diese Softare steht unter der GNU GPL v3.0 <a href="https://github.com/wiemachendiedasnur/school_miner/blob/main/LICENSE">Lizenz</a>.
