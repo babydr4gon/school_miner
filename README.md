@@ -40,7 +40,7 @@ Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganzta
 
 Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die in der Regel von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden.
 
-Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, löschen und den Rest für die Suche speichern. ein paar Anregungen zum Filtern der Excel-Listen stehen <a href"(https://github.com/wiemachendiedasnur/school_miner/Howto_Schullisten_filtern.md)">hier Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. In jedem Fall bildet diese Liste die Basis. Voreingestellt ist als Name für diese Liste schulen.xlsx.
+Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, löschen und den Rest für die Suche speichern. Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. In jedem Fall bildet diese Liste die Basis. Voreingestellt ist als Name für diese Liste schulen.xlsx.
 
 Das Skript wird für jede der Schulen in dieser Liste nach der offiziellen Webseite suchen. Dort identifiziert es den Schultyp und erkennt bestimmte Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
 
