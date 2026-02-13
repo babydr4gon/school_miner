@@ -50,7 +50,7 @@ Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen 
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
 
-<h3>Der Ablauf im Detail: vom AutoScan zur Landkartes</h3>
+<h3>Der Ablauf im Detail: vom AutoScan zur Landkarte</h3>
 
 Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 <ol>
