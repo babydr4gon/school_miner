@@ -65,7 +65,7 @@ Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesa
 
 <li>Karte erstellen: Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule auf der Basis der Ergebnisliste.</li>
 
-<li>Sync mit Input-Datei: Das Skript überprüft manuell, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.</li>
+<li>Sync mit Input-Datei: Das Skript überprüft, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.</li>
 
 <li>Einstellungen: Hier kann man die Grundeinstellungen verändern.</li>
 
