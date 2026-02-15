@@ -17,7 +17,6 @@ import shutil
 import webbrowser
 import sys
 
-# Externe Bibliotheken
 from openai import OpenAI
 from google import genai
 from ddgs import DDGS
@@ -46,7 +45,6 @@ PRIORITY_LINKS_L2 = ["Leitbild", "Konzept", "Pädagogik", "Schwerpunkte", "Ganzt
 
 DEFAULT_CONFIG = {
     "INPUT_FILE": "schulen.xlsx",
-    "SHEET_NAME": "Schulverzeichnis",
     "OUTPUT_FILE": "schulen_ergebnisse.xlsx",
     "MAP_FILE": "schulen_karte.html",
     "COLUMN_NAME_IDX": 0,
@@ -59,6 +57,7 @@ DEFAULT_CONFIG = {
     "SCHULTYPEN_LISTE": DEFAULT_SCHULTYPEN,
     "KEYWORD_LISTE": DEFAULT_HARD_KEYWORDS,
     "AI_PRIORITY": ["openai", "gemini", "groq", "openrouter"],
+    "MANUAL_RESUME_IDX": 0,
     "PROMPT_TEMPLATE": (
         "Du bist ein Schul-Analyst. Ich gebe dir Textauszüge von der Webseite.\n"
         "Fasse das pädagogische Konzept zusammen.\n"
@@ -97,15 +96,12 @@ def open_browser_search(query):
     """
     url = f"https://duckduckgo.com/?q={query}"
     
-    # Liste der Browser-Namen, die wir probieren wollen
-    # Linux: google-chrome, chromium-browser, chromium
-    # Windows: windows-default (webbrowser module handelt das meist gut selbst)
-    
+   
     browsers_to_try = []
     if sys.platform.startswith("linux"):
         browsers_to_try = ['chromium-browser', 'chromium', 'google-chrome']
     elif sys.platform.startswith("win"):
-        browsers_to_try = ['google-chrome', 'chrome'] # Windows braucht oft Pfade, aber wir versuchen es via Alias
+        browsers_to_try = ['google-chrome', 'chrome'] 
     
     # Versuch 1: Spezifische Browser
     for b in browsers_to_try:
@@ -158,9 +154,11 @@ def get_driver():
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     
-    service = Service(ChromeDriverManager().install())
+    #service = Service(ChromeDriverManager().install())
+    service = Service(executable_path=r'/usr/bin/chromedriver')
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    driver.set_page_load_timeout(25)
+    #driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver.set_page_load_timeout(15) # Max 15 Sek Ladezeit
     return driver
 
 # --- DATA MANAGEMENT ---
@@ -390,84 +388,140 @@ def ki_analyse(context_text):
 # --- MAPPING ---
 
 def generate_map(data):
-    print("\n🗺️  Erstelle Landkarte...")
-    geolocator = Nominatim(user_agent="schul_scanner_v13")
-    m = folium.Map(location=[51.1657, 10.4515], zoom_start=6) # Mitte Deutschland
+    print("\n🗺️  Erstelle Landkarte (mit Fallback-Suche)...")
     
-    # 1. LEGENDE ANPASSEN
-    # Wir nutzen Orange für "Gemischt", da Folium kein knalliges Gelb als Standard-Marker hat
+    # Wichtig: User-Agent muss eindeutig sein
+    geolocator = Nominatim(user_agent=f"schul_scanner_{int(time.time())}")
+    
+    # Karte zentrieren (Deutschland Mitte)
+    m = folium.Map(location=[51.1657, 10.4515], zoom_start=6) 
+    
+    # 1. LEGENDE 
     legend_html = '''
-     <div style="position: fixed; bottom: 50px; right: 50px; width: 180px; height: 130px; border:2px solid grey; z-index:9999; font-size:14px; background-color:white; opacity:0.9; padding: 10px;">
+     <div style="position: fixed; bottom: 50px; right: 50px; width: 200px; height: 160px; border:2px solid grey; z-index:9999; font-size:14px; background-color:white; opacity:0.9; padding: 10px;">
      <b>Legende</b><br>
+     <i style="color:purple" class="fa fa-map-marker"></i> Begabtenförderung<br>
      <i style="color:blue" class="fa fa-map-marker"></i> Gymnasium<br>
      <i style="color:green" class="fa fa-map-marker"></i> Gesamtschule<br>
-     <i style="color:red" class="fa fa-map-marker"></i> Realschule<br>
      <i style="color:orange" class="fa fa-map-marker"></i> Mix (Gym/HR)<br>
+     <i style="color:red" class="fa fa-map-marker"></i> Realschule<br>
      <i style="color:gray" class="fa fa-map-marker"></i> Sonstige/Förder<br>
      </div>
      '''
     m.get_root().html.add_child(Element(legend_html))
 
     count = 0
-    for entry in data:
+    missing_count = 0
+    
+    print("   (Dieser Schritt kann dauern, um die OSM-Server nicht zu überlasten...)")
+
+    for i, entry in enumerate(data):
         name = entry.get('schulname', ''); ort = entry.get('ort', '')
         
-        # Karte zeigt nur Schulen an, wo wir Daten haben
-        if not name or not entry.get('webseite') or entry.get('webseite') == "Nicht gefunden": continue
+        # Ignoriere Einträge komplett ohne Daten/URL
+        if not name or not entry.get('webseite') or entry.get('webseite') == "Nicht gefunden": 
+            continue
         
         try:
-            loc = geolocator.geocode(f"{name}, {ort}, Germany", timeout=5)
+            # --- GEOCODING STRATEGIE ---
+            lat, lon = None, None
+            is_approx = False
+            
+            # Versuch 1: Exakte Suche (Schule + Ort)
+            # Wir bereinigen den Namen etwas (z.B. alles in Klammern weg)
+            clean_name = re.sub(r"\(.*?\)", "", name).strip()
+            query = f"{clean_name}, {ort}, Germany"
+            loc = geolocator.geocode(query, timeout=10)
+            
             if loc:
-                schultyp = entry.get('schultyp', 'Unbekannt')
-                ki = entry.get('ki_zusammenfassung', 'Keine Analyse')
-                kw = entry.get('keywords', '-')
-                
-                # --- FARB-LOGIK ---
-                st = schultyp.lower()
-                
-                # Die Reihenfolge der if-Abfragen ist wichtig!
-                
-                # 1. Gesamtschulen -> GRÜN
-                if "gesamtschule" in st:
-                    color = "green"
-                
-                # 2. Gemischte Schulen (Gymnasium UND (Haupt oder Real)) -> GELB (Orange)
-                elif "gymnasium" in st and ("haupt" in st or "real" in st or "verbund" in st):
-                    color = "orange" 
-                
-                # 3. Reines Gymnasium (wenn es nicht schon oben abgefangen wurde) -> BLAU
-                elif "gymnasium" in st:
-                    color = "blue"
-                    
-                # 4. Reine Realschule -> BLAU
-                elif "realschule" in st or "real- und hauptschule" in st:
-                    color = "red"
-                
-                # 4. Alles andere (Förderschule, Grundschule pur, etc.) -> GRAU
-                else:
-                    color = "gray"
-                
-                # -----------------------
+                lat, lon = loc.latitude, loc.longitude
+            else:
+                # Versuch 2: NUR ORT (Fallback)
+                # Wenn Schule nicht gefunden, nimm die Stadtmitte
+                loc_city = geolocator.geocode(f"{ort}, Germany", timeout=10)
+                if loc_city:
+                    lat = loc_city.latitude
+                    lon = loc_city.longitude
+                    # Zufälliger "Jitter" (Verschiebung), damit Marker nicht stapeln
+                    # ca. 500m - 1km Umkreis
+                    lat += random.uniform(-0.015, 0.015) 
+                    lon += random.uniform(-0.015, 0.015)
+                    is_approx = True
+            
+            # Wenn immer noch keine Koordinaten -> Überspringen
+            if not lat or not lon:
+                print(f"   ❌ Ort nicht gefunden: {ort}")
+                missing_count += 1
+                continue
 
-                html = f"""
-                <div style="font-family: Arial; width: 300px;">
-                    <h4>{name}</h4>
-                    <p style="color:grey; font-size:11px">{schultyp}</p>
-                    <hr>
-                    <p><b>KW:</b> {kw}</p>
-                    <div style="max-height:150px;overflow-y:auto;background:#f9f9f9;padding:5px;font-size:11px;border:1px solid #eee;">
-                        {ki}
-                    </div>
-                    <br>
-                    <a href="{entry.get('webseite','#')}" target="_blank" style="background-color:#007bff;color:white;padding:3px 8px;text-decoration:none;border-radius:3px;font-size:11px">Webseite</a>
+            # --- DATEN VORBEREITEN ---
+            schultyp = str(entry.get('schultyp', 'Unbekannt'))
+            ki = str(entry.get('ki_zusammenfassung', 'Keine Analyse'))
+            kw = str(entry.get('keywords', '-'))
+            
+            # --- FARB-LOGIK ---
+            st = schultyp.lower()
+            full_text_scan = (ki + " " + kw).lower()
+            
+            begabung_keywords = ["hochbegabt", "hochbegabte", "begabte", "akzeleration"]
+            
+            # Zuordnung 
+            if any(word in full_text_scan for word in begabung_keywords):
+                color = "purple"
+            elif "gesamtschule" in st:
+                color = "green"
+            elif "gymnasium" in st and ("haupt" in st or "real" in st or "verbund" in st):
+                color = "orange" 
+            elif "gymnasium" in st:
+                color = "blue"
+            elif "realschule" in st:
+                color = "red"
+            else:
+                color = "gray"
+            
+            # --- POPUP HTML ---
+            # Hinweis hinzufügen, wenn Position nur geschätzt ist
+            pos_hint = "<br><i style='color:red; font-size:10px'>(Position geschätzt/Stadtmitte)</i>" if is_approx else ""
+            
+            html = f"""
+            <div style="font-family: Arial; width: 300px;">
+                <h4>{name}</h4>
+                <p style="color:grey; font-size:11px">{schultyp} {pos_hint}</p>
+                <hr>
+                <p><b>KW:</b> {kw}</p>
+                <div style="max-height:150px;overflow-y:auto;background:#f9f9f9;padding:5px;font-size:11px;border:1px solid #eee;">
+                    {ki}
                 </div>
-                """
-                folium.Marker([loc.latitude, loc.longitude], popup=folium.Popup(html, max_width=350), icon=folium.Icon(color=color, icon="info-sign")).add_to(m)
-                count += 1
-                time.sleep(1.0)
-        except: pass
+                <br>
+                <a href="{entry.get('webseite','#')}" target="_blank" style="background-color:#007bff;color:white;padding:3px 8px;text-decoration:none;border-radius:3px;font-size:11px">Webseite</a>
+            </div>
+            """
+            
+            # Marker setzen
+            icon_type = "info-sign" if not is_approx else "question-sign" # Anderes Icon für geschätzte Position
+            folium.Marker(
+                [lat, lon], 
+                popup=folium.Popup(html, max_width=350), 
+                icon=folium.Icon(color=color, icon=icon_type)
+            ).add_to(m)
+            
+            count += 1
+            
+            # Fortschritt alle 50 Schulen anzeigen
+            if count % 50 == 0:
+                print(f"   ... {count} Schulen platziert ...")
+                
+            # WICHTIG: Höflichkeitspause für OSM (sonst blockieren sie dich)
+            time.sleep(1.2) 
+            
+        except Exception as e:
+            # Fehler ausgeben, statt pass
+            print(f"   ⚠️ Fehler bei {name}: {e}")
+            pass
+
     m.save(CONFIG["MAP_FILE"])
-    print(f"✅ Karte gespeichert ({count} Schulen)")
+    print(f"\n✅ Karte gespeichert: '{CONFIG['MAP_FILE']}'")
+    print(f"   📊 Ergebnis: {count} platziert, {missing_count} ohne Ort.")
 
 # --- MENU HELPERS ---
 
@@ -531,7 +585,7 @@ def menu_settings():
 
 def run_auto_scan(data):
     print(f"\n🤖 AUTO-SCAN V13.1 (Safe Mode) | Sensibilität: {CONFIG['SENSITIVITY'].upper()}")
-    print("ℹ️ Drücke STRG+C, um zu pausieren (Daten werden dann sicher gespeichert).")
+    print("ℹ️ Drücke STRG+C, um zu pausieren.")
     
     driver = get_driver()
     unsaved_changes = False # Merken, ob wir was zu speichern haben
@@ -578,117 +632,178 @@ def run_auto_scan(data):
         if driver: driver.quit()
 
 def run_manual_review(data):
-    print("\n🕵️ MANUELLE KONTROLLE (Lückenfüller & Typ-Korrektur)")
-    print("ℹ️  Das Skript sucht nach Fehlern, leeren Feldern oder fehlendem Schultyp.")
+    # Lade aktuellen Startpunkt aus der Config
+    start_idx = CONFIG.get("MANUAL_RESUME_IDX", 0)
+    
+    # Falls der Index ungültig ist (z.B. Liste wurde kleiner), auf 0 setzen
+    if start_idx >= len(data): start_idx = 0
+
+    print(f"\n🕵️ MANUELLE KONTROLLE (Lückenfüller)")
+    print(f"ℹ️  Start bei Zeile {start_idx + 1} von {len(data)}.")
+    if start_idx > 0:
+        print(f"   (Nutze Option [7], um wieder ganz von vorne zu beginnen)")
     
     driver = None
+    found_count = 0
     
     try:
-        for i, entry in enumerate(data):
-            # --- TRIGGER ---
+        for i in range(start_idx, len(data)):
+            entry = data[i]
+            
+            # Index für den nächsten Start merken & speichern
+            CONFIG["MANUAL_RESUME_IDX"] = i
+            # Wir speichern die Config nur alle paar Einträge oder beim Skip/Edit, 
+            # um die Festplatte zu schonen.
+            
+            # --- TRIGGER LOGIK ---
             ki_text = str(entry.get('ki_zusammenfassung', ''))
             typ_text = str(entry.get('schultyp', ''))
-            
-            
-            # Fehler im KI-Text?
+            keyw_text = str(entry.get('keywords', ''))
             is_error_ki = any(m in ki_text for m in CONFIG["ERROR_MARKERS"])
-            is_anything_ki = len(ki_text) > 5
+            is_empty_ki = len(ki_text) < 10
+            is_empty_typ = len(typ_text) < 3
             
-            # Schultyp fehlt? (Deine neue Bedingung)
-            is_anything_typ = len(typ_text) > 3 
-            
-            # Wenn alles gut ist -> überspringen
-            #if not is_error_ki and not is_empty_ki and not is_empty_typ:
-            if is_anything_typ and is_anything_ki:
+            if not is_error_ki and not is_empty_ki and not is_empty_typ:
                 continue
 
-            # --- ANZEIGE ---
+            found_count += 1
+            
+            
+            # --- 3. ANZEIGE ---
             print(f"\n[{i+1}/{len(data)}] 🏫 {entry['schulname']} ({entry['ort']})")
             print(f"   URL:  {entry.get('webseite', 'N/A')}")
-            print(f"   Typ:  {typ_text if typ_text else '❌ FEHLT'}")
-            print(f"   KI:   {ki_text[:50]}..." if len(ki_text) > 5 else "   KI:   ❌ FEHLT")
+            print(f"   Typ:  {typ_text if len(typ_text) > 2 else '❌ FEHLT'}")
+            print(f"   Keywords:  {keyw_text if len(keyw_text) > 2 else '❌ FEHLT'}")
             
-            # Browser öffnen
+            # Statusanzeige für KI-Text
+            if any(m in ki_text for m in CONFIG["ERROR_MARKERS"]):
+                print(f"   KI:   ⚠️ {ki_text}")
+            elif len(ki_text) < 10:
+                print("   KI:   ❌ FEHLT / LEER")
+            else:
+                print(f"   KI:   {ki_text[:50]}...")
+            
+            #Browser zur Kontrolle öffnen    
             open_browser_search(f"{entry['schulname']} {entry['ort']} Startseite")
             
-            # --- INTERAKTION ---
+            # --- 4. INTERAKTION ---
             while True:
-                print("\n   [1] Auto-Scan (Neu suchen)")
-                print("   [2] URL Paste (Link manuell setzen + Scan)")
-                print("   [3] Daten editieren (Typ manuell nachtragen)")
-                print("   [4] Skip")
-                print("   [5] Exit")
+                print("\n   [1] Auto-Scan (Komplett neu suchen)")
+                print("   [2] KI-Check wiederholen (Bypass Strict Filter)")
+                print("   [3] URL Paste (Link manuell setzen)")
+                print("   [4] Typ manuell nachtragen")
+                print("   [5] Keywords manuell nachtragen")
+                print("   [6] Skip (Diesen Eintrag überspringen)")
+                print("   [7] Reset des Indexes. Suche beginnt wieder oben in der Liste)")
+                print("   [8] Exit (Zurück zum Menü)")
+                
                 c = input("   👉 Wahl: ").strip()
                 
-                if c == "1": # Auto-Scan
+                if c == "1":
                     if not driver: driver = get_driver()
-                    print("   🤖 Starte Auto-Scan...")
                     url, typ, kw, ctx = crawl_and_analyze(driver, entry['schulname'], entry['ort'])
                     entry['webseite'] = url; entry['schultyp'] = typ; entry['keywords'] = kw
-                    
-                    if (typ or kw) and ctx:
-                        if CONFIG["SENSITIVITY"] == "strict" and not ctx:
-                             entry['ki_zusammenfassung'] = "Zu wenige Infos (Strict Filter)"
-                        else:
-                            entry['ki_zusammenfassung'] = ki_analyse(ctx)
-                            print("   ✅ Analyse erfolgreich.")
-                    else:
-                        print("   ❌ Nichts gefunden.")
-                    save_data(data)
-                    break 
+                    entry['ki_zusammenfassung'] = ki_analyse(ctx) if ctx else "Nicht gefunden"
+                    save_data(data); break 
 
-                elif c == "2": # URL manuell
-                    u = input("   🔗 URL: ").strip()
-                    if u.startswith("http"):
+                elif c == "2":
+                    curr = entry.get('webseite', '')
+                    u = input("   🔗 URL (Enter = behalten): ").strip()
+                    target_url = u if u.startswith("http") else curr
+                    if target_url and target_url != "Nicht gefunden":
                         if not driver: driver = get_driver()
-                        entry['webseite'] = u
-                        t, text, links = get_selenium_content(driver, u)
-                        entry['schultyp'] = ", ".join(find_school_type_in_text(text))
-                        if text:
-                            entry['ki_zusammenfassung'] = ki_analyse(text[:15000])
-                            print("   ✅ Analyse erfolgreich.")
+                        t, text, _ = get_selenium_content(driver, target_url)
+                        entry['ki_zusammenfassung'] = ki_analyse(text[:15000]) if text else "Inhalt leer"
                         save_data(data)
                     break
 
-                elif c == "3": # Manuell Editieren (NEU)
-                    print(f"   Aktueller Typ: {entry.get('schultyp','')}")
-                    new_typ = input("   ✍️  Neuer Schultyp (Enter=behalten): ").strip()
+                elif c == "3": # URL Paste (Via Deep-Scan)
+                    u = input("   🔗 URL eingeben: ").strip()
+                    if u.startswith("http"):
+                        if not driver: driver = get_driver()
+                        
+                        print(f"   🤖 Starte Deep-Scan für: {u}")
+                        # Wir übergeben die URL direkt als erstes Argument.
+                        # Die Funktion erkennt "http" und überspringt die Google-Suche,
+                        # führt aber das volle Programm (Validierung + Unterseiten-Scan) durch.
+                        url, typ, kw, ctx = crawl_and_analyze(driver, u, entry['ort'])
+                        
+                        # Ergebnisse übernehmen
+                        entry['webseite'] = url
+                        
+                        # Nur überschreiben, wenn auch was gefunden wurde, sonst behalten was da war
+                        if typ: entry['schultyp'] = typ
+                        if kw: entry['keywords'] = kw
+                        
+                        if ctx:
+                            print("   🧠 Kontext gefunden (Startseite + Unterseiten). Sende an KI...")
+                            entry['ki_zusammenfassung'] = ki_analyse(ctx)
+                            print("   ✅ Analyse erfolgreich.")
+                        else:
+                            print("   ⚠️ URL geladen, aber 'crawl_and_analyze' hat keine Inhalte validiert.")
+                            print("      (Möglicherweise hat der Strict-Filter den Ort nicht im Impressum gefunden)")
+                            entry['ki_zusammenfassung'] = "Inhalt abgelehnt (Strict Filter)"
+                        
+                        save_data(data)
+                    break
+                elif c == "4":
+                    new_typ = input(f"   ✍️ Typ ({entry.get('schultyp')}): ").strip()
                     if new_typ: entry['schultyp'] = new_typ
                     
-                    # Optional: Auch Keywords korrigieren, falls gewünscht
-                    # new_kw = input("   ✍️  Keywords (Enter=behalten): ").strip()
-                    # if new_kw: entry['keywords'] = new_kw
+                    save_data(data); break
+                
+                elif c == "5":
+                    new_kw = input(f"Keywords ({entry.get('keywords')}): ").strip()
+                    if new_kw: entry['keywords'] = new_kw
                     
-                    save_data(data)
-                    print("   💾 Gespeichert.")
-                    break
+                    save_data(data); break
 
-                elif c == "4": break # Skip
-                elif c == "5": return # Exit
+                elif c == "6": # SKIP
+                    print("   ⏭️ Merke Position und gehe weiter...")
+                    save_config_to_file(CONFIG) # Position sichern
+                    break
+                
+                elif c == "8": # EXIT
+                    save_config_to_file(CONFIG)
+                    return 
+
+                elif c == "7": # RESET
+                    CONFIG["MANUAL_RESUME_IDX"] = 0
+                    save_config_to_file(CONFIG)
+                    print("   ♻️ Index zurückgesetzt. Beim nächsten Start geht es bei 1 los.")
+
+        # Wenn wir am Ende der Liste angekommen sind
+        print("\n✅ Ende der Liste erreicht.")
+        CONFIG["MANUAL_RESUME_IDX"] = 0
+        save_config_to_file(CONFIG)
 
     except KeyboardInterrupt:
-        print("\n🛑 Abbruch.")
+        save_config_to_file(CONFIG)
+        print("\n🛑 Pause. Position gespeichert.")
     finally:
         if driver: driver.quit()
+
 
 def run_single_edit(data):
     print("\n✏️ EINZELNE ZEILE BEARBEITEN")
     row = input("👉 Zeilennummer (aus Excel/Liste): ").strip()
     if not row.isdigit(): return
-    idx = int(row) - 2 # Header ist Zeile 1, Index start bei 0 -> -2 ist meist korrekt bei Excel-Denkweise
+    idx = int(row) - 2 # Header ist Zeile 1, Index start bei 0 -> -2 ist meist korrekt bei Excel
     
     if 0 <= idx < len(data):
         e = data[idx]
         print(f"\nGewählt: {e['schulname']} ({e['ort']})")
         print(f"URL: {e.get('webseite')}")
         print(f"Typ: {e.get('schultyp')}")
+        print(f"Keywords:{e.get('keywords')}")
+        
         
         # Browser öffnen
         open_browser_search(f"{e['schulname']} {e['ort']}")
 
         print("\n[1] Auto-Scan")
         print("[2] URL manuell eingeben")
-        print("[3] Daten manuell editieren (Typ/Text)")
+        print("[3] Daten manuell editieren (Typ/Keywords)")
         print("[4] Zurück")
         
         c = input("👉 Wahl: ").strip()
@@ -715,7 +830,7 @@ def run_single_edit(data):
                 new_typ = input(f"Schultyp ({e.get('schultyp')}): ").strip()
                 if new_typ: e['schultyp'] = new_typ
                 
-                # Hier könnte man auch KI Text manuell löschen oder keywords anpassen
+                # Keywords anpassen
                 new_kw = input(f"Keywords ({e.get('keywords')}): ").strip()
                 if new_kw: e['keywords'] = new_kw
                 
