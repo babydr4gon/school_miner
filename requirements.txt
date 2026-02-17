@@ -8,3 +8,4 @@ folium
 geopy
 openai
 google-generativeai
+branca
