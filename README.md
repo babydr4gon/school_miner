@@ -46,7 +46,7 @@ Das Skript wird für jede der Schulen in dieser Liste nach der offiziellen Webse
 
 Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen der Name und der Ort der Schule, die gefundenen Keywords, die verwendete Webseite und die Zusammenfassung der KI. Es gibt die Möglichkeit, Fehler, die bei der automatisierten Suche passieren, individuell zu korrigieren. 
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Schulübersicht.jpg" alt="Landkarte" width="650" height="650"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Karte.jpg" alt="Landkarte" width="650" height="650"/>
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
 
