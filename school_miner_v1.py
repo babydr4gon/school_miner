@@ -146,18 +146,59 @@ def print_system_status():
 # --- SELENIUM DRIVER ---
 
 def get_driver():
+    print("   🔌 Starte Browser-Engine...", end="\r")
+
     chrome_options = Options()
-    chrome_options.add_argument("--headless") 
+    # "--headless=new" ist stabiler als das alte "--headless"
+    chrome_options.add_argument("--headless=new") 
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--window-size=1920,1080")
+    # Unterdrückt unnötige USB-Fehlermeldungen in der Konsole
+    chrome_options.add_argument("--log-level=3") 
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+
+    driver = None
     
-    service = Service(ChromeDriverManager().install()) # windows
-    #service = Service(executable_path=r'/usr/bin/chromedriver') # linux
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    driver.set_page_load_timeout(15) # Max 15 Sek Ladezeit
+    # --- VERSUCH 1: Automatisch (Standard für Windows/Mac) ---
+    try:
+        # Versucht, den Treiber passend zum installierten Chrome herunterzuladen
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+    except Exception as e_auto:
+        # --- VERSUCH 2: System-Pfad (Fallback für Raspberry Pi / Linux) ---
+        
+        try:
+            # Liste typischer Pfade auf Linux/Pi
+            paths = [
+                "/usr/bin/chromedriver",
+                "/usr/lib/chromium-browser/chromedriver",
+                "/snap/bin/chromium.chromedriver"
+            ]
+            
+            found = next((p for p in paths if os.path.exists(p)), None)
+            
+            if found:
+                service = Service(executable_path=found)
+                driver = webdriver.Chrome(service=service, options=chrome_options)
+            else:
+                # Letzter Versuch: 'chromedriver' im globalen PATH ?
+                driver = webdriver.Chrome(options=chrome_options)
+                
+        except Exception as e_sys:
+            print("\n\n❌ FEHLER: Konnte keinen Chrome-Treiber starten.")
+            print("   Bitte sicherstellen, dass Google Chrome oder Chromium installiert ist.")
+            print(f"   Fehler Auto-Mode: {e_auto}")
+            print(f"   Fehler System-Mode: {e_sys}")
+            print("\n   Tipp für Raspberry Pi: 'sudo apt install chromium-chromedriver'")
+            return None
+
+    if driver:
+        driver.set_page_load_timeout(20) # 20 Sek Timeout
+        print("   ✅ Browser-Engine bereit.   ")
+        
     return driver
 
 # --- DATA MANAGEMENT ---
@@ -306,31 +347,36 @@ def validate_page_strict(text):
         
     return False
 
-def crawl_and_analyze(driver, school_name, school_ort):
-    # 1. URL suchen
-    url = search_ddg_robust(f"{school_name} {school_ort} Startseite")
+def crawl_and_analyze(driver, school_input, school_ort):
+    # 1. INPUT CHECK: Ist es ein Name oder schon eine URL?
+    if school_input.startswith("http"):
+        url = school_input
+        is_manual_url = True # Merker für "Deep Mode"
+    else:
+        url = search_ddg_robust(f"{school_input} {school_ort} Startseite")
+        is_manual_url = False
+
     if not url: return "Nicht gefunden", "", "", ""
     
-    print(f"      -> URL: {url}")
+    print(f"      -> URL: {url} {'(Deep Scan)' if is_manual_url else ''}")
     
-    # 2. Startseite laden
+    # 2. Seite laden
     title_main, text_main, links_main = get_selenium_content(driver, url)
     if not text_main: return "Nicht erreichbar", "", "", ""
     
     # --- STRICT MODE CHECK ---
-    if CONFIG["SENSITIVITY"] == "strict":
+    # Bei manueller URL sind wir gnädiger, da Deep-Links oft kein "Wir sind eine..." enthalten
+    if CONFIG["SENSITIVITY"] == "strict" and not is_manual_url:
         is_valid = validate_page_strict(text_main)
         if not is_valid:
-            print("      🛑 Strict Mode: Seite abgelehnt (Kein 'Wir sind eine...' / 'Leitbild' etc.)")
-            return url, "", "", "" # Leerer Kontext verhindert KI-Aufruf
-        else:
-            print("      ✅ Strict Mode: Seite akzeptiert (Offizielle Merkmale gefunden).")
+            print("      🛑 Strict Mode: Seite abgelehnt.")
+            return url, "", "", ""
     # -------------------------
     
-    # 3. Schultyp auf Startseite suchen
+    # 3. Schultyp & Keywords auf aktueller Seite suchen
     found_types = find_school_type_in_text(title_main + "\n" + text_main)
     found_kws = set()
-    chunks = [f"--- Startseite ---\n{text_main[:2500]}"]
+    chunks = [f"--- Seite 1 ({title_main}) ---\n{text_main[:2500]}"]
     
     def scan(txt):
         for k in CONFIG["KEYWORD_LISTE"]:
@@ -338,26 +384,49 @@ def crawl_and_analyze(driver, school_name, school_ort):
 
     scan(text_main)
     
-    # 4. Deep Scan (Level 1 & 2)
+    # 4. Deep Scan (Level 1 Verfolgung)
     domain = urlparse(url).netloc
+    l1_targets = []
     
-    l1_urls = [h for h, t in links_main if h and domain in urlparse(h).netloc and any(p.lower() in t for p in PRIORITY_LINKS_L1)]
+    for href, txt in links_main:
+        if href and domain in urlparse(href).netloc:
+            txt_low = txt.lower()
+            
+            # A) Standard-Links (immer gut)
+            if any(p.lower() in txt_low for p in PRIORITY_LINKS_L1):
+                l1_targets.append(href)
+            
+            # B) DEEP SCAN LOGIK (Nur bei manueller URL)
+           
+            elif is_manual_url:
+                # Filtert Müll raus (Impressum, Login, etc.), nimmt aber den Rest
+                blocklist = ["impressum", "datenschutz", "login", "anmelden", "kontakt", "sitemap"]
+                if not any(b in txt_low for b in blocklist) and len(txt) > 2:
+                    l1_targets.append(href)
+
+    # Dubletten entfernen und limitieren
+    # Bei Manuell scannen wir bis zu 3 Unterseiten, um den "Schatz" zu finden
+    scan_list = list(dict.fromkeys(l1_targets))[:3]
     
-    for l1 in list(dict.fromkeys(l1_urls))[:2]:
-        print(f"      -> Scan L1: {l1}")
+    for l1 in scan_list:
+        print(f"      -> Scan Deep: {l1}")
         t1, text1, links1 = get_selenium_content(driver, l1)
         if text1:
             scan(text1)
             chunks.append(f"--- {t1} ---\n{text1[:2500]}")
             if not found_types: found_types.extend(find_school_type_in_text(text1))
             
-            l2_urls = [h for h, t in links1 if h and domain in urlparse(h).netloc and any(p.lower() in t for p in PRIORITY_LINKS_L2)]
-            for l2 in list(dict.fromkeys(l2_urls))[:2]:
-                print(f"         -> Scan L2: {l2}")
-                t2, text2, _ = get_selenium_content(driver, l2)
-                if text2:
-                    scan(text2)
-                    chunks.append(f"--- {t2} ---\n{text2[:2500]}")
+            # Falls wir im Auto-Modus sind, scannen wir hier normalerweise Level 2.
+            # Im Deep-Modus (Manuell) reicht uns Level 1 (was ja eigentlich schon Level 5+ ist),
+            # sonst ufert es aus. Wenn wir aber noch keine Keywords haben, schauen wir kurz rein.
+            if not found_kws and not is_manual_url:
+                 l2_urls = [h for h, t in links1 if h and domain in urlparse(h).netloc and any(p.lower() in t for p in PRIORITY_LINKS_L2)]
+                 for l2 in list(dict.fromkeys(l2_urls))[:2]:
+                    # print(f"         -> Scan L2: {l2}") # Optional für weniger Output
+                    t2, text2, _ = get_selenium_content(driver, l2)
+                    if text2:
+                        scan(text2)
+                        chunks.append(f"--- {t2} ---\n{text2[:2500]}")
 
     schultyp_final = ", ".join(sorted(list(set(found_types))))
 
