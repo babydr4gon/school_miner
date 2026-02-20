@@ -5,13 +5,8 @@
 </h1>
 
 <p align="center">
-  <a href="https://liberapay.com/Gernot_Sell/donate">
-    <img alt="Liberapay donation button" src="https://img.shields.io/badge/liberapay-donate-green">
-  </a>
-  <a href="[https://www.patreon.com/gernotsell?fan_landing=true](https://patreon.com/GernotSell?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink)">
-    <img alt="Patreon donation button" src="https://img.shields.io/badge/patreon-donate-green.svg">
-  </a>
-</p>
+  <a href="https://www.buymeacoffee.com/gernotzumc2" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 45px !important;width: 167px !important;" ></a>
+ </p>
 
 Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, Montessori, etc.) zu durchsuchen und die pädagogischen Konzepte mit KI zusammenzufassen.
 
