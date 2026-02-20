@@ -33,7 +33,7 @@ load_dotenv()
 CONFIG_FILE = "config.json"
 
 DEFAULT_SCHULTYPEN = ["Grundschule", "Hauptschule", "Realschule", "Gymnasium", "Gesamtschule", "Förderschule", "Berufsschule", "Verbundschule", "Mittelstufenschule", "Oberstufengymnasium"]
-DEFAULT_HARD_KEYWORDS = ["MINT", "Sport", "Musik", "Gesellschaftswissenschaften", "Sprachen", "bilingual", "Lernlabor", "Lernloft", "Lernatelier", "themenorientiert", "Makerspace", "Multikultur", "Charakter", "Montessori", "Walldorf", "Jenaplan", "jahrgangsübergreifend", "altersübergreifend", "Ganztag"]
+DEFAULT_HARD_KEYWORDS = ["MINT", "Sport", "Musik", "Gesellschaftswissenschaften", "Sprachen", "bilingual", "themenorientiert", "Multikultur", "Charakter", "Montessori", "Walldorf", "jahrgangsübergreifend", "altersübergreifend", "Ganztag"]
 
 PRIORITY_LINKS_L1 = ["Schulprofil", "Schulprogramm", "Leitbild", "Über uns", "Unsere Schule", "Wir über uns"]
 PRIORITY_LINKS_L2 = ["Leitbild", "Konzept", "Pädagogik", "Schwerpunkte", "Ganztag", "Angebote", "AGs", "Förderung"]
@@ -144,7 +144,7 @@ def get_driver():
     print("   🔌 Starte Browser-Engine...", end="\r")
 
     chrome_options = Options()
-    # "--headless=new" ist stabiler als das alte "--headless"
+    # "--headless=new" scheinbar stabiler als das alte "--headless"
     chrome_options.add_argument("--headless=new") 
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
@@ -163,10 +163,10 @@ def get_driver():
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
     except Exception as e_auto:
-        # --- VERSUCH 2: System-Pfad (Fallback für Raspberry Pi / Linux) ---
+        # --- VERSUCH 2: System-Pfad (Fallback für Linux) ---
         
         try:
-            # Liste typischer Pfade auf Linux/Pi
+            # Liste typischer Pfade auf Linux
             paths = [
                 "/usr/bin/chromedriver",
                 "/usr/lib/chromium-browser/chromedriver",
@@ -301,8 +301,8 @@ def validate_page_strict(text):
     Der TÜV-Modus: Prüft, ob es sich wirklich um eine offizielle Schulwebseite handelt.
     Kriterien: Spezielle Phrasen oder Keywords.
     """
-    text_sample = text[:10000] # Wir prüfen die ersten 10.000 Zeichen (Performance)
-    
+    text_sample = text[:10000] # Wir prüfen die ersten 10.000 Zeichen
+        
     # 1. Hard Keywords (reichen alleine aus)
     triggers = ["leitbild", "konzept", "schulprogramm", "schulprofil", "pädagogik"]
     if any(t in text_sample.lower() for t in triggers):
@@ -360,7 +360,7 @@ def crawl_and_analyze(driver, school_input, school_ort):
     if not text_main: return "Nicht erreichbar", "", "", ""
     
     # --- STRICT MODE CHECK ---
-    # Bei manueller URL sind wir gnädiger, da Deep-Links oft kein "Wir sind eine..." enthalten
+    # Bei manueller URL weniger streng, da Deep-Links oft kein "Wir sind eine..." enthalten
     if CONFIG["SENSITIVITY"] == "strict" and not is_manual_url:
         is_valid = validate_page_strict(text_main)
         if not is_valid:
@@ -379,7 +379,7 @@ def crawl_and_analyze(driver, school_input, school_ort):
 
     scan(text_main)
     
-    # 4. Deep Scan (Level 1 Verfolgung)
+    # 4. Deep Scan 
     domain = urlparse(url).netloc
     l1_targets = []
     
@@ -387,7 +387,7 @@ def crawl_and_analyze(driver, school_input, school_ort):
         if href and domain in urlparse(href).netloc:
             txt_low = txt.lower()
             
-            # A) Standard-Links (immer gut)
+            # A) Standard-Links 
             if any(p.lower() in txt_low for p in PRIORITY_LINKS_L1):
                 l1_targets.append(href)
             
@@ -400,7 +400,7 @@ def crawl_and_analyze(driver, school_input, school_ort):
                     l1_targets.append(href)
 
     # Dubletten entfernen und limitieren
-    # Bei Manuell scannen wir bis zu 3 Unterseiten, um den "Schatz" zu finden
+    # Bei Manuell bis zu 3 Unterseiten scannen
     scan_list = list(dict.fromkeys(l1_targets))[:3]
     
     for l1 in scan_list:
@@ -412,8 +412,8 @@ def crawl_and_analyze(driver, school_input, school_ort):
             if not found_types: found_types.extend(find_school_type_in_text(text1))
             
             # Falls wir im Auto-Modus sind, scannen wir hier normalerweise Level 2.
-            # Im Deep-Modus (Manuell) reicht uns Level 1 (was ja eigentlich schon Level 5+ ist),
-            # sonst ufert es aus. Wenn wir aber noch keine Keywords haben, schauen wir kurz rein.
+            # Im Deep-Modus (Manuell) reicht uns Level 1,
+            # Wenn wir aber noch keine Keywords haben, schauen wir kurz rein.
             if not found_kws and not is_manual_url:
                  l2_urls = [h for h, t in links1 if h and domain in urlparse(h).netloc and any(p.lower() in t for p in PRIORITY_LINKS_L2)]
                  for l2 in list(dict.fromkeys(l2_urls))[:2]:
@@ -491,7 +491,7 @@ def generate_map(data):
             is_approx = False
             
             # Versuch 1: Exakte Suche (Schule + Ort)
-            # Wir bereinigen den Namen etwas (z.B. alles in Klammern weg)
+            # Bereinigung, alles in Klammern weg
             clean_name = re.sub(r"\(.*?\)", "", name).strip()
             query = f"{clean_name}, {ort}, Germany"
             loc = geolocator.geocode(query, timeout=10)
