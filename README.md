@@ -8,7 +8,7 @@
   <a href="https://liberapay.com/Gernot_Sell/donate">
     <img alt="Liberapay donation button" src="https://img.shields.io/badge/liberapay-donate-green">
   </a>
-  <a href="https://www.patreon.com/gernotsell?fan_landing=true">
+  <a href="[https://www.patreon.com/gernotsell?fan_landing=true](https://patreon.com/GernotSell?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink)">
     <img alt="Patreon donation button" src="https://img.shields.io/badge/patreon-donate-green.svg">
   </a>
 </p>
@@ -79,6 +79,8 @@ Nach dem Start erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten:
 **Beenden:** Beenden des Skripts.
 
 <h3>Die Browserversion</h3>
+
+**Systemstatus:** Automatisch wird an dieser Stelle überprüft, ob nötige Werkzeuge für die Nutzung des Skripts installiert sind. Erwartet werden die Pyhton-Module aus der Datei requirments.txt sowie der Internetbrower Chrome (Windows / Linux) oder Chromium (linux).
 
 **API Keys:** In der linken Seitenleiste sind die Felder für API Keys (OpenAI, Gemini, etc.). Diese müssen dort eingetragen werden.
 
