@@ -31,6 +31,7 @@ DEFAULT_SCHULTYPEN = ["Grundschule", "Hauptschule", "Realschule", "Gymnasium", "
 DEFAULT_HARD_KEYWORDS = ["MINT", "Sport", "Musik", "Gesellschaftswissenschaften", "Sprachen", "bilingual", "themenorientiert", "Makerspace", "Charakter", "Montessori", "Walldorf", "jahrgangsübergreifend", "altersübergreifend", "Ganztag"]
 PRIORITY_LINKS_L1 = ["Schulprofil", "Schulprogramm", "Leitbild", "Über uns", "Unsere Schule", "Wir über uns"]
 PRIORITY_LINKS_L2 = ["Leitbild", "Konzept", "Pädagogik", "Schwerpunkte", "Ganztag", "Angebote", "AGs", "Förderung"]
+filename = "Karte.html"
 
 st.set_page_config(page_title="school_miner ", page_icon="🏫", layout="wide")
 
@@ -292,8 +293,38 @@ def ki_analyse(context_text, config, api_keys):
     return "KI-Fehler"
 
 # --- MAP GENERATION ---
+# --- HELPER FÜR CACHING ---
+@st.cache_data(show_spinner=False)
+def get_coordinates(name, ort):
+    """
+    Holt die Koordinaten und speichert sie im Cache. 
+    Pausiert (time.sleep) NUR bei echten API-Aufrufen!
+    """
+    geolocator = Nominatim(user_agent="schul_scanner_st_cache")
+    try:
+        clean_name = re.sub(r"\(.*?\)", "", name).strip()
+        loc = geolocator.geocode(f"{clean_name}, {ort}, Germany", timeout=5)
+        
+        if loc:
+            time.sleep(1.2) # Höflichkeitspause nach echtem Request
+            return loc.latitude, loc.longitude, False
+        
+        time.sleep(1.2) # Pause vor dem Fallback-Request
+        loc_city = geolocator.geocode(f"{ort}, Germany", timeout=5)
+        if loc_city:
+            lat = loc_city.latitude + random.uniform(-0.015, 0.015)
+            lon = loc_city.longitude + random.uniform(-0.015, 0.015)
+            time.sleep(1.2)
+            return lat, lon, True
+            
+    except Exception as e:
+        print(f"Warnung bei {name}: {e}")
+        
+    return None, None, False
+
+
+# --- MAP GENERATION ---
 def generate_folium_map(data):
-    geolocator = Nominatim(user_agent=f"schul_scanner_st_{int(time.time())}")
     m = folium.Map(location=[51.1657, 10.4515], zoom_start=6)
     
     legend_html = '''
@@ -309,61 +340,54 @@ def generate_folium_map(data):
      '''
     m.get_root().html.add_child(Element(legend_html))
 
-    progress_text = "Platziere Marker auf der Karte..."
+    progress_text = "Platziere Marker auf der Karte (nutze Cache, falls vorhanden)..."
     my_bar = st.progress(0, text=progress_text)
     total = len(data)
     
     for i, entry in enumerate(data):
-        my_bar.progress((i + 1) / total, text=f"Platziere {entry.get('schulname')}...")
-        name = entry.get('schulname', ''); ort = entry.get('ort', '')
-        if not name or not entry.get('webseite') or entry.get('webseite') == "Nicht gefunden": continue
+        name = entry.get('schulname', '')
+        ort = entry.get('ort', '')
         
-        try:
-            lat, lon, is_approx = None, None, False
-            clean_name = re.sub(r"\(.*?\)", "", name).strip()
-            loc = geolocator.geocode(f"{clean_name}, {ort}, Germany", timeout=2)
+        if not name or not entry.get('webseite') or entry.get('webseite') == "Nicht gefunden": 
+            my_bar.progress((i + 1) / total, text=f"Überspringe {name}...")
+            continue
             
-            if loc:
-                lat, lon = loc.latitude, loc.longitude
-            else:
-                loc_city = geolocator.geocode(f"{ort}, Germany", timeout=2)
-                if loc_city:
-                    lat, lon = loc_city.latitude, loc_city.longitude
-                    lat += random.uniform(-0.015, 0.015); lon += random.uniform(-0.015, 0.015)
-                    is_approx = True
-            
-            if not lat or not lon: continue
+        my_bar.progress((i + 1) / total, text=f"Platziere {name}...")
+        
+        # --- CACHE-ABFRAGE STATT DIREKTEM AUFRUF ---
+        lat, lon, is_approx = get_coordinates(name, ort)
+        
+        if not lat or not lon: continue
 
-            schultyp = str(entry.get('schultyp', 'Unbekannt'))
-            ki = str(entry.get('ki_zusammenfassung', 'Keine Analyse'))
-            kw = str(entry.get('keywords', '-'))
-            st_lower = schultyp.lower()
-            full_text_scan = (ki + " " + kw).lower()
-            
-            if any(word in full_text_scan for word in ["hochbegabt", "hochbegabte", "begabte", "akzeleration"]): color = "purple"
-            elif "gesamtschule" in st_lower: color = "green"
-            elif "gymnasium" in st_lower and ("haupt" in st_lower or "real" in st_lower): color = "orange"
-            elif "gymnasium" in st_lower: color = "blue"
-            elif "realschule" in st_lower: color = "red"
-            else: color = "gray"
-            
-            pos_hint = "<br><i style='color:red; font-size:10px'>(Position geschätzt)</i>" if is_approx else ""
-            html = f"""
-            <div style="font-family: Arial; width: 300px;">
-                <h4>{name}</h4>
-                <p style="color:grey; font-size:11px">{schultyp} {pos_hint}</p>
-                <hr>
-                <p><b>KW:</b> {kw}</p>
-                <div style="max-height:100px;overflow-y:auto;background:#f9f9f9;padding:5px;font-size:11px;border:1px solid #eee;">{ki}</div>
-                <br><a href="{entry.get('webseite','#')}" target="_blank">Webseite</a>
-            </div>
-            """
-            folium.Marker([lat, lon], popup=folium.Popup(html, max_width=350), icon=folium.Icon(color=color, icon="info-sign" if not is_approx else "question-sign")).add_to(m)
-            # time.sleep(1.0) # To avoid OSM block, but makes Streamlit slow. Reduced sleep for demo.
-            
-        except: pass
-    
+        schultyp = str(entry.get('schultyp', 'Unbekannt'))
+        ki = str(entry.get('ki_zusammenfassung', 'Keine Analyse'))
+        kw = str(entry.get('keywords', '-'))
+        st_lower = schultyp.lower()
+        full_text_scan = (ki + " " + kw).lower()
+        
+        # Farb-Logik
+        if any(word in full_text_scan for word in ["hochbegabt", "hochbegabte", "begabte", "akzeleration"]): color = "purple"
+        elif "gesamtschule" in st_lower: color = "green"
+        elif "gymnasium" in st_lower and ("haupt" in st_lower or "real" in st_lower): color = "orange"
+        elif "gymnasium" in st_lower: color = "blue"
+        elif "realschule" in st_lower: color = "red"
+        else: color = "gray"
+        
+        pos_hint = "<br><i style='color:red; font-size:10px'>(Position geschätzt)</i>" if is_approx else ""
+        html = f"""
+        <div style="font-family: Arial; width: 300px;">
+            <h4>{name}</h4>
+            <p style="color:grey; font-size:11px">{schultyp} {pos_hint}</p>
+            <hr>
+            <p><b>KW:</b> {kw}</p>
+            <div style="max-height:100px;overflow-y:auto;background:#f9f9f9;padding:5px;font-size:11px;border:1px solid #eee;">{ki}</div>
+            <br><a href="{entry.get('webseite','#')}" target="_blank">Webseite</a>
+        </div>
+        """
+        folium.Marker([lat, lon], popup=folium.Popup(html, max_width=350), icon=folium.Icon(color=color, icon="info-sign" if not is_approx else "question-sign")).add_to(m)
+        
     my_bar.empty()
+    
     # Karte lokal speichern
     try:
         m.save(filename)
