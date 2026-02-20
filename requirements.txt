@@ -9,3 +9,6 @@ geopy
 openai
 google-generativeai
 branca
+geopy
+streamlit
+streamlit-folium
