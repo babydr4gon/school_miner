@@ -1,8 +1,14 @@
 <h1 align="center">
-  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/dragon_mine.png" alt="School_miner icon" width="300" height="300"/>
+  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/dragon_mine.png" alt="School_miner icon" width="400" height="400"/>
   <br>
   School_Miner
 </h1>
+
+<p align="center">
+<a href="https://patreon.com/babydr4gon?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink">
+    <img alt="Patreon donation button" src="https://img.shields.io/badge/patreon-donate-green.svg">
+  </a>
+</p>
 
 
 Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, Montessori, etc.) zu durchsuchen und die pädagogischen Konzepte mit KI zusammenzufassen.
