@@ -4,9 +4,6 @@
   School_Miner
 </h1>
 
-<p align="center">
-  <a href="https://www.buymeacoffee.com/gernotzumc2" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 45px !important;width: 167px !important;" ></a>
- </p>
 
 Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, Montessori, etc.) zu durchsuchen und die pädagogischen Konzepte mit KI zusammenzufassen.
 
@@ -107,4 +104,11 @@ Mit der Sensibilität stellt man ein, wie streng das Skript bei der Kontrolle de
 Im Modus "strict" werden weitere Bedingungen genannt, damit eine Webseite als offizielle Webseite der Schule angenommen und gegebenenfalls von der KI ausgewertet wird. 
 
 Die KI-Priorität regelt, in welcher Reihenfolge einzelne KI-Anbieter angesprochen werden. Werden keine KI-API-Keys definiert, läuft das Skript trotzdem weiter - es gibt dann eben keine KI-generierten Zusammenfassungen.
+
+<h1>Zu guter Letzt: </h1>
+Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-)
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/gernotzumc2" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 90px !important;width: 324px !important;"></a>
+ </p>
 
