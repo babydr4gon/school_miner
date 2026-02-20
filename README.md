@@ -58,7 +58,7 @@ Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen 
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
 
-<h3>Die Kommandozeilenversion schoo_miner.py</h3>
+<h3>Die Kommandozeilenversion</h3>
 
 Nach dem Start erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 
@@ -78,7 +78,7 @@ Nach dem Start erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten:
 
 **Beenden:** Beenden des Skripts.
 
-<h3>Die Browserversion app.py</h3>
+<h3>Die Browserversion</h3>
 
 **API Keys:** In der linken Seitenleiste sind die Felder für API Keys (OpenAI, Gemini, etc.). Diese müssen dort eingetragen werden.
 
