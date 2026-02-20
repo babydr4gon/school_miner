@@ -17,30 +17,38 @@ Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganzta
 
 <h1>Installation</h1>
 
-1. **Repository klonen** oder als ZIP herunterladen und entpacken.
+**Repository klonen** oder als ZIP herunterladen und entpacken.
 
-2. **Abhängigkeiten installieren:**
+**Abhängigkeiten installieren:**
    
    ```bash
    pip install -r requirements.txt
+   ```
 
-3. API-Keys in einer Datei namens .env im gleichen Ordner hinterlegen. Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
+**API-Keys** in einer Datei namens .env im gleichen Ordner hinterlegen. Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
    ```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
+   ```
 
-4. Schulliste anlegen: Erstelle eine Datei schulen.xlsx. Das Skript erwartet in Spalte A den Namen der Schule und in Spalte C den Ort der Schule.  Wenn diese Daten in anderen Spalten stehen, lässt sich das in den Einstellungen später anpassen.
+**Schulliste anlegen:** Erstelle eine Datei schulen.xlsx. Das Skript erwartet in Spalte A den Namen der Schule und in Spalte C den Ort der Schule.  Wenn diese Daten in anderen Spalten stehen, lässt sich das in den Einstellungen später anpassen.
 
-5. Starten
+**Starten**
+   Die CLI-Version des Programms: 
    ```bash
    python school_miner.py
-
+   ```
+   und die Version für den Browser:
+   ```bash
+   streamlit run app.py
+   ```
+   
 <h1>Nutzung</h1>
 
 <h3>Die Basis: eine Liste mit Schulen</h3>
 
 Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die in der Regel von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden.
 
-Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, löschen und den Rest für die Suche speichern. Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. In jedem Fall bildet diese Liste die Basis. Voreingestellt ist als Name für diese Liste schulen.xlsx.
+Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, löschen und den Rest für die Suche speichern. Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. In jedem Fall bildet diese Liste die Basis. Voreingestellt ist als Name für diese Liste "schulen.xlsx".
 
 Das Skript wird für jede der Schulen in dieser Liste nach der offiziellen Webseite suchen. Dort identifiziert es den Schultyp und erkennt bestimmte Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
 
@@ -50,27 +58,37 @@ Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen 
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
 
-<h3>Der Ablauf im Detail: vom AutoScan zur Landkarte</h3>
+<h3>Die Kommandozeilenversion schoo_miner.py</h3>
 
-Nach dem Start mit python school_miner.py erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
-<ol>
+Nach dem Start erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 
 <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Start.jpg" alt="Hauptmenü" width="650" height="650"/>
 
-<li>AutoScan: die vorbereitete Liste der Schulen wird automatisch, Zeile für Zeile abgearbeitet.</li>
+**AutoScan:** die vorbereitete Liste der Schulen wird automatisch, Zeile für Zeile abgearbeitet.
 
-<li>Manuelle Kontrolle: Das Skript geht noch einmal Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder neu suchen lassen.</li>
+**Manuelle Kontrolle:** Das Skript geht noch einmal Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder neu suchen lassen.
 
-<li>Einzelne Zeile: Hier kann der Nutzer gezielt eine einzelne Schule aus der Ergebnisliste auswählen, wenn er mit dem Suchergebnis zu dieser Schule unzufrieden ist.</li>
+**Einzelne Zeile:** Hier kann der Nutzer gezielt eine einzelne Schule aus der Ergebnisliste auswählen, wenn er mit dem Suchergebnis zu dieser Schule unzufrieden ist.
 
-<li>Karte erstellen: Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule auf der Basis der Ergebnisliste.</li>
+**Karte erstellen:** Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule auf der Basis der Ergebnisliste.
 
-<li>Sync mit Input-Datei: Das Skript überprüft, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.</li>
+**Sync mit Input-Datei:** Das Skript überprüft, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.
 
-<li>Einstellungen: Hier kann man die Grundeinstellungen verändern.</li>
+**Einstellungen:** Hier kann man die Grundeinstellungen verändern.
 
-<li>Beenden: Beenden des Skripts.
-</ol>
+**Beenden:** Beenden des Skripts.
+
+<h3>Die Browserversion app.py</h3>
+
+**API Keys:** In der linken Seitenleiste sind die Felder für API Keys (OpenAI, Gemini, etc.). Diese müssen dort eingetragen werden.
+
+**Datei laden:** Im Tab "Daten & Upload" kann man eine bestehende Quelldatei "schulen.xlsx" hochladen. Falls es schon eine Ergebnisliste "schulen_ergebnisse.xlsx" gibt, wird diese automatisch geladen.
+
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Browser.jpg" alt="Hauptmenü" width="650" height="650"/>
+
+**Scannen:** Gehe auf den Tab "Auto-Scan". Klicke auf "Scan starten". Man kann live mitverfolgen, welche Schule gerade bearbeitet wird. Der Browser läuft im Hintergrund (Headless), stört also nicht. Alternativ gibt es auch hier die Mögichkeit, eine bereits vorhandenen Ergebnisliste Manuel nachzubearbeiten.
+
+**Karte:** Der Tab "Karte" generiert eine HTML-Datei mit der Landkarte.
 
 <h3>Die Einstellungen</h3>
 
