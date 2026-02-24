@@ -1,43 +1,56 @@
+
+
 <h1 align="center">
   <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/dragon_mine.png" alt="School_miner icon" width="400" height="400"/>
   <br>
   School_Miner
 </h1>
 
-<p align="center">
-<a href="https://patreon.com/babydr4gon?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink">
-    <img alt="Patreon donation button" src="https://img.shields.io/badge/patreon-donate-green.svg">
-  </a>
-</p>
-
 
 Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganztag, Montessori, etc.) zu durchsuchen und die pädagogischen Konzepte mit KI zusammenzufassen.
+
+Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet sich <a href="https://github.com/babydr4gon/school_miner_browser/tree/main">hier</a>. 
 
 <h1>Installation</h1>
 
 **Repository klonen** oder als ZIP herunterladen und entpacken.
 
 **Abhängigkeiten installieren:**
+
+Dazu einen Terminal / eine Eingabeaufforderung öffnen und 
    
    ```bash
    pip install -r requirements.txt
    ```
+eingeben. Falls es dabei unter Windows Fehlermeldungen gibt, dass die Installation zwar erfolgreich aber "not on PATH" war, muss gegebenenfalls noch eine System-Einstellung verändert werden. Wie das geht, steht <a href="https://www.geeksforgeeks.org/python/how-to-add-python-to-windows-path/">hier</a>. 
+
 
 **API-Keys** in einer Datei namens .env im gleichen Ordner hinterlegen. Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
    ```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
    ```
 
-**Schulliste anlegen:** Eine Liste mit Schulnamen und Adressen herunterladen und unter "schulen.xlsx" abspeichern.. 
+**Schulliste anlegen:** Eine Liste mit Schulnamen und Adressen herunterladen und unter "schulen.xlsx" abspeichern. Das Skript erwartet, dass sich der Name der Schue in der Spalte A und der Ort in Spalte C befinden. Wer das ändern möchte, muss im Code folgende Angaben anpassen:
 
-**Starten**
-   Die CLI-Version des Programms: 
+```bash
+"COLUMN_NAME_IDX": 0,
+"COLUMN_ORT_IDX": 2,
+```
+
+**Starten:**
+   Einen Terminal / eine Eingabeaufforderung starten und in den Ordner wechseln, in dem das Skript liegt, z.B.:
+   unter Windows
+   ```bash
+   cd Ein_Ordner\ein_Unterordner\...
+   ```
+   oder unter Linux
+   ```bash
+   cd Ein_Ordner/ein_Unterordner/ ...
+   ```
+   Dann das Skript starten mit
+
    ```bash
    python school_miner.py
-   ```
-   und die Version für den Browser:
-   ```bash
-   streamlit run app.py
    ```
    
 <h1>Nutzung</h1>
@@ -46,7 +59,7 @@ Dieses Tool hilft Eltern, Schulwebseiten automatisch nach Keywords (MINT, Ganzta
 
 Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die in der Regel von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden.
 
-Diese Listen muss man für die eigenen Bedürfnisse anpassen: Man könnte also z.B. Städte, die nicht in Frage kommen, löschen und den Rest für die Suche speichern. Oder man lässt die Listen unverändert und scannt damit alle Schulen in einem Bundesland. Voreingestellt ist als Name für diese Liste "schulen.xlsx".
+Diese Listen muss man für die eigenen Bedürfnisse anpassen, also beispielsweise die Schulen rauslöschen, die geographisch zu weit weg sind. Voreingestellt ist als Name für diese Liste "schulen.xlsx". 
 
 Das Skript wird für jede der Schulen in dieser Liste nach der offiziellen Webseite suchen. Dort identifiziert es den Schultyp und erkennt bestimmte Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
 
@@ -54,17 +67,19 @@ Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen 
 
 <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Karte.jpg" alt="Landkarte" width="650" height="650"/>
 
-Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und gegebenenfalls eine KI-Zusammenfassung. 
+Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und die KI-Zusammenfassung. 
 
-<h3>Die Kommandozeilenversion</h3>
+<h3>Nach dem Start</h3>
 
-Nach dem Start erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
+Es erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
 
 <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Start.jpg" alt="Hauptmenü" width="650" height="650"/>
 
 **AutoScan:** die vorbereitete Liste der Schulen wird automatisch, Zeile für Zeile abgearbeitet.
 
-**Manuelle Kontrolle:** Das Skript geht noch einmal Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder neu suchen lassen.
+**Manuelle Kontrolle:** Das Skript geht noch einmal Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder einzelne Werte gezielt verändern. Beispielsweise kann man eine neue Webseite angeben, die automatisch neu durchsucht wird. Oder es lassen sich manuell Schultyp bzw. Keywords eintragen.
+
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Manuell.jpg" alt="Manuelle Kontrolle" width="650" height="650"/>
 
 **Einzelne Zeile:** Hier kann der Nutzer gezielt eine einzelne Schule aus der Ergebnisliste auswählen, wenn er mit dem Suchergebnis zu dieser Schule unzufrieden ist.
 
@@ -76,45 +91,11 @@ Nach dem Start erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten:
 
 **Beenden:** Beenden des Skripts.
 
-<h3>Die Browserversion</h3>
-
-**Systemstatus:** Automatisch wird an dieser Stelle überprüft, ob nötige Werkzeuge für die Nutzung des Skripts installiert sind. Erwartet werden die Pyhton-Module aus der Datei requirments.txt sowie der Internetbrower Chrome (Windows / Linux) oder Chromium (linux).
-
-**API Keys:** In der linken Seitenleiste sind die Felder für API Keys (OpenAI, Gemini, etc.). Diese müssen dort eingetragen werden.
-
-**Datei laden:** Im Tab "Daten & Upload" kann man eine bestehende Quelldatei "schulen.xlsx" hochladen. Falls es schon eine Ergebnisliste "schulen_ergebnisse.xlsx" gibt, wird diese automatisch geladen.
-
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Browser.jpg" alt="Hauptmenü" width="650" height="650"/>
-
-**Scannen:** Gehe auf den Tab "Auto-Scan". Klicke auf "Scan starten". Man kann live mitverfolgen, welche Schule gerade bearbeitet wird. Der Browser läuft im Hintergrund (Headless), stört also nicht. Alternativ gibt es auch hier die Mögichkeit, eine bereits vorhandenen Ergebnisliste Manuel nachzubearbeiten.
-
-**Karte:** Der Tab "Karte" generiert eine HTML-Datei mit der Landkarte.
-
-<h3>Die Einstellungen</h3>
-
-Das Skript erstellt automatisch eine config.json-Datei. Alle Einstellungen, die man darin vornimmt, überschreiben die Standardeinstellungen im Skript. Es lohnt sich also, hier etwas Zeit und Mühe zu investieren. 
-
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Settings.jpg" alt="Einstellungen" width="650" height="650"/>
-
-In der config.json-Datei wird unter anderem eine Keywordliste gespeichert. Wie erfolgreich das Suche nach der richtigen Schule ist, hängt nicht zuletzt von der Qualität dieser Keywords ab. Außerdem befinden sich hier die verschiedenen Schultypen und der Prompt für die KI.
-
-Die Skripte erwarten als Input-Datei standardmäßig eine Datei mit dem Namen „schulen.xlsx“, die im gleichen Verzeichnis liegt, in dem sich auch die Skripte befinden. school_miner.py erwartet, dass sich der Name der Schue in der Spalte A und der Ort in Spalte C befinden. Wer das ändern möchte, muss im Code folgende Angaben anpassen:
-
-```bash
-"COLUMN_NAME_IDX": 0,
-"COLUMN_ORT_IDX": 2,
-```
-
-Mit der Sensibilität stellt man ein, wie streng das Skript bei der Kontrolle der gefundenen Webseiten sein soll. Im Modus "Normal" wird nur geschaut, ob Name und Ort der Schule auf der gefundenen Webseite stehen. Das kann in Einzelfällen dazu führen, dass eine völlig falsche Webseite als Grundlage für die Suche genommen wird, nur weil dort zufällig Name und Ort der Schule genannt werden (Stayfriends, Wikipedia, etc.). 
-
-Im Modus "strict" werden weitere Bedingungen genannt, damit eine Webseite als offizielle Webseite der Schule angenommen und gegebenenfalls von der KI ausgewertet wird. 
-
-Die KI-Priorität regelt, in welcher Reihenfolge einzelne KI-Anbieter angesprochen werden. Werden keine KI-API-Keys definiert, läuft das Skript trotzdem weiter - es gibt dann eben keine KI-generierten Zusammenfassungen.
-
 <h1>Zu guter Letzt: </h1>
-Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-)
+Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-). Ich freue mnich darüber.
 
 <p align="center">
   <a href="https://www.buymeacoffee.com/gernotzumc2" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 90px !important;width: 324px !important;"></a>
  </p>
+
 
