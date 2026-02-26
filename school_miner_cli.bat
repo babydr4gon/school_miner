@@ -4,6 +4,7 @@ echo =========================================
 echo  🏫 Schul-Scanner Pro - Terminal Version
 echo =========================================
 echo.
+cd /d "%~dp0"
 
 REM 1. Pruefen, ob Python installiert ist
 python --version >nul 2>&1
