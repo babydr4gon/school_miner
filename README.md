@@ -114,7 +114,7 @@ Es erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten:
 
 **Beenden:** Beenden des Skripts.
 
-<h1>Zu guter Letzt: </h1>
+<h1>Kauf mir einen Kaffee! </h1>
 Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-). Ich freue mnich darüber.
 
 <p align="center">
