@@ -28,11 +28,7 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
 
 **Start:** Auf Windows-Rechnern, Doppelklick auf die heruntergeladene Datei "school_miner_cli.bat". 
 
-Auf Linux-Rechnern, im Terminal eingeben:
-
-   ```bash
-   python school_miner.py
-   ```
+Auf Linux-Rechnern, die Datei "school_miner_startcli.sh" starten. Gegebenenfalls noch ausführbar machen.
 
 <h1>Manuelle Installation</h1>
 
