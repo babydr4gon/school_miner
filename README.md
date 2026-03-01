@@ -11,7 +11,7 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
 
 <h1>Automatische Installation</h1>
 
-**Vorbereitung:** Auf dem Rechner muss Python und der Browser Google Chrome bzw Chromium installiert sein. Wer Python auf einem Windows-Rechner nachinstalliert, muss darauf achten, dass der  Haken bei "Add Python to PATH" gesetzt ist.
+**Vorbereitung:** Auf dem Rechner muss Python installiert sein, mindestens in der Version 3.11. Wer Python auf einem Windows-Rechner nachinstalliert, muss darauf achten, dass der Haken bei "Add Python to PATH" gesetzt ist. Außerdem erwartet das Programm den Browser Google Chrome bzw. Chromium.
 
 **Repository klonen** oder als ZIP herunterladen und entpacken.
 
@@ -26,9 +26,9 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
 "COLUMN_ORT_IDX": 2,
 ```
 
-**Start:** Auf Windows-Rechnern, Doppelklick auf die heruntergeladene Datei "school_miner_cli.bat". 
+**Start:** Auf Windows-Rechnern Doppelklick auf die heruntergeladene Datei "school_miner_cli.bat". 
 
-Auf Linux-Rechnern, die Datei "school_miner_startcli.sh" starten. Gegebenenfalls noch ausführbar machen.
+Auf Linux-Rechnern die Datei "school_miner_startcli.sh" starten. Gegebenenfalls noch ausführbar machen.
 
 <h1>Manuelle Installation</h1>
 
@@ -88,17 +88,15 @@ Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen 
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und die KI-Zusammenfassung. 
 
-<h3>Nach dem Start</h3>
+<h3>Das Hauptmenü</h3>
 
-Es erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten: 
+Nach dem Start erscheint folgende Übersicht:
 
 <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Start.jpg" alt="Hauptmenü" width="650" height="650"/>
 
 **AutoScan:** die vorbereitete Liste der Schulen wird automatisch, Zeile für Zeile abgearbeitet.
 
 **Manuelle Kontrolle:** Das Skript geht noch einmal Zeile für Zeile durch die Ergebnisliste. Man kann als Nutzer die jeweiligen Zeilen bestätigen oder einzelne Werte gezielt verändern. Beispielsweise kann man eine neue Webseite angeben, die automatisch neu durchsucht wird. Oder es lassen sich manuell Schultyp bzw. Keywords eintragen.
-
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Manuell.jpg" alt="Manuelle Kontrolle" width="650" height="650"/>
 
 **Einzelne Zeile:** Hier kann der Nutzer gezielt eine einzelne Schule aus der Ergebnisliste auswählen, wenn er mit dem Suchergebnis zu dieser Schule unzufrieden ist.
 
@@ -109,6 +107,27 @@ Es erscheint ein Auswahlmenü mit insgesamt sieben Möglichkeiten:
 **Einstellungen:** Hier kann man die Grundeinstellungen verändern.
 
 **Beenden:** Beenden des Skripts.
+
+<h3>Die manuelle Kontrolle</h3>
+
+Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollständig sein. Mit der manuellen Kontrolle lässt sich hier nacharbeiten. Das Programm sucht nach unvollständigen Einträgen in der Ergebnisliste, zeigt diesen Eintrag an und öffnet die bisher gespeicherte Webseite. All diese Dinge kann der Nutzer im Rahmen der manuellen Kontrolle jetzt ändern.
+
+**Auto Scan:**: Bei der manuellen Kontrolle bedeutet AutoScan, dass der gesamte Eintrag noch einmal mit den vorgegebenen Einstellungen automatisch gescannt wird. Das ist zum Beispiel dann sinnvoll, wenn eine Webseite beim ersten Durchlauf nicht erreichbar war.
+
+**KI-Check wiederholen:** Nur das Feld "KI-Zusammenfassung" wird noch einmal bearbeitet, durch eine erneute Abfrage mit den bisher gefundenen Daten und den aktuellen Einstellungen.
+
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Manuell.jpg" alt="Manuelle Kontrolle" width="650" height="650"/>
+
+**URL Paste:** Falls beim ersten Durchlauf eine falsche Webadresse gefunden wurde, lässt sich das hier korrigieren. Anschließend läuft der komplette AutoScan für diesen Eintrag noch einmal durch.
+
+**Typ manuell nachtragen:** Hier kann der Schultyp verändert werden.
+
+**Keywords manuell nachtragen:** Eigene Schlüsselwörter eintragen.
+
+**Skip:** Einen Eintrag überspringen, z.B. weil er zwar unvollständig, aber auch unwichtig ist.
+
+**Reset des Indexes:** Das Programm merkt sich, an welcher Stelle in der Liste die manuelle Kontrolle zuletzt abgebrochen wurde und beginnt beim nächsten Mal genau bei diesem Eintrag. Sollte man aber komplett noch einmal von vorne beginnen wollen, kann man den Merkindex hier auf 0 zurücksetzen.
+
 
 <h1>Kauf mir einen Kaffee! </h1>
 Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-). Ich freue mnich darüber.
