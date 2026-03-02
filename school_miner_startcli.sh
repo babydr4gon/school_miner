@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# --- TERMINAL-CHECK & RELAUNCH ---
+
+if [ ! -t 0 ]; then
+    echo "Kein Terminal erkannt. Suche nach verfügbarem Terminal-Emulator..."
+    # Liste gängiger Linux-Terminals
+    for term in x-terminal-emulator gnome-terminal konsole xterm alacritty; do
+        if command -v "$term" > /dev/null 2>&1; then
+            # Startet das Skript im gefundenen Terminal neu
+            -
+            if [ "$term" = "gnome-terminal" ]; then
+                exec "$term" -- "$0" "$@"
+            else
+                exec "$term" -e "$0" "$@"
+            fi
+            exit 0
+        fi
+    done
+    echo "Fehler: Kein Terminal-Emulator gefunden!"
+    exit 1
+fi
+
 # --- 1. INS VERZEICHNIS WECHSELN ---
 cd "$(dirname "$0")"
 
@@ -28,20 +49,6 @@ echo "[2/3] Prüfe Abhängigkeiten..."
 pip install --upgrade pip &> /dev/null
 pip install -r requirements.txt &> /dev/null
 
-# --- 5. STREAMLIT KONFIGURATION ---
-# Wir erstellen den .streamlit Ordner und die config.toml
-mkdir -p .streamlit
-cat <<EOF > .streamlit/config.toml
-[server]
-port = 8501
-address = "127.0.0.1"
-headless = true
-enableCORS = false
-enableXsrfProtection = false
-
-[browser]
-gatherUsageStats = false
-EOF
 
 echo "[3/3] Starte school_miner..."
 
