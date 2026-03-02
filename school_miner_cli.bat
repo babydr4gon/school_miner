@@ -1,10 +1,9 @@
 @echo off
 title Schul-Scanner Pro (Terminal)
 echo =========================================
-echo  🏫 Schul-Scanner Pro - Terminal Version
+echo  🏫 school_miner Pro - Terminal Version
 echo =========================================
 echo.
-cd /d "%~dp0"
 
 REM 1. Pruefen, ob Python installiert ist
 python --version >nul 2>&1
@@ -34,4 +33,3 @@ echo [3/3] Starte Skript...
 echo.
 python school_miner.py
 
-pause
