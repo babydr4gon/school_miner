@@ -15,7 +15,7 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
 
 **Repository klonen** oder als ZIP herunterladen und entpacken.
 
-**API Key:** Die Datei .env.example in .env umbenennen und API-Keys hinter dem Gleichheitszeichen einfügen.  Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
+**API Key:** Die Datei .env.example in .env umbenennen und API-Keys hinter dem Gleichheitszeichen einfügen.  Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen.
    ```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
    ```
@@ -26,17 +26,12 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
 "COLUMN_ORT_IDX": 2,
 ```
 
-**Start:** Auf Windows-Rechnern Doppelklick auf die heruntergeladene Datei "school_miner_cli.bat". 
-
-Auf Linux-Rechnern die Datei "school_miner_startcli.sh" starten. Gegebenenfalls noch ausführbar machen.
 
 <h1>Manuelle Installation</h1>
 
 **Repository klonen** oder als ZIP herunterladen und entpacken.
 
-**Abhängigkeiten installieren:**
-
-Dazu einen Terminal / eine Eingabeaufforderung öffnen und 
+**Abhängigkeiten installieren:** Dazu einen Terminal / eine Eingabeaufforderung öffnen und 
    
    ```bash
    pip install -r requirements.txt
@@ -44,7 +39,7 @@ Dazu einen Terminal / eine Eingabeaufforderung öffnen und
 eingeben. Falls es dabei unter Windows Fehlermeldungen gibt, dass die Installation zwar erfolgreich aber "not on PATH" war, muss gegebenenfalls noch eine System-Einstellung verändert werden. Wie das geht, steht <a href="https://www.geeksforgeeks.org/python/how-to-add-python-to-windows-path/">hier</a>. 
 
 
-**API-Keys** in einer Datei namens .env im gleichen Ordner hinterlegen. Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen, sondern nur die gefundenen Keywords.
+**API-Keys** in einer Datei namens .env im gleichen Ordner hinterlegen. Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen.
    ```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
    ```
@@ -56,27 +51,24 @@ eingeben. Falls es dabei unter Windows Fehlermeldungen gibt, dass die Installati
 "COLUMN_ORT_IDX": 2,
 ```
 
-**Starten:**
-   Einen Terminal / eine Eingabeaufforderung starten und in den Ordner wechseln, in dem das Skript liegt, z.B.:
-   unter Windows
-   ```bash
-   cd Ein_Ordner\ein_Unterordner\...
-   ```
-   oder unter Linux
-   ```bash
-   cd Ein_Ordner/ein_Unterordner/ ...
-   ```
-   Dann das Skript starten mit
+<h1>Start</h1>
+
+Auf Windows-Rechnern Doppelklick auf die heruntergeladene Datei "school_miner_cli.bat".  
+
+Auf Linux-Rechnern die Datei "school_miner_startcli.sh" starten. Gegebenenfalls noch ausführbar machen.
+
+Alternativ einen Terminal / eine Eingabeaufforderung starten und in den Ordner wechseln, in dem das Skript liegt. Mit
 
    ```bash
    python school_miner.py
    ```
+   starten.
    
 <h1>Nutzung</h1>
 
 <h3>Die Basis: eine Liste mit Schulen</h3>
 
-Zunächst sollte man eine Liste der Schulen erstellen, über die man Informationen sammeln möchte. In allen Bundesländern gibt es entsprechende Listen, die in der Regel von den Kultusministerien oder von den statistischen Landesämtern gepflegt werden.
+In allen Bundesländern gibt es Listen mit Namen und Adressen der Schulen. Sie werden  in der Regel von den Kultusministerien oder von den statistischen Landesämtern gepflegt.
 
 Diese Listen muss man für die eigenen Bedürfnisse anpassen, also beispielsweise die Schulen rauslöschen, die geographisch zu weit weg sind. Voreingestellt ist als Name für diese Liste "schulen.xlsx". 
 
