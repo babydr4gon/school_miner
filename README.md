@@ -130,6 +130,8 @@ Die meisten Schulwebseiten sind...schlecht. Viele dieser Seiten sind entweder ve
 
 **Den Index in der config.json nutzen:** Manchmal hat man Pech und in der Ergebnisliste gibt es einen längeren Abschnitt ohne vernünftige Ergebnisse. Über 20 oder 30 Zeilen lang hat das Programm möglicherweise keine oder keine guten Daten geliefert. Wenn man nun den Autoscan wieder bei 0 startet, werden andere Ergebnisse wieder überschrieben und sind verloren. In diesem Fall kann man besser ganz unten in der config.json den Wert "AUTO_RESUME_IDX" auf die Zeile stellen, bei der man wieder anfangen möchte. Wenn die 20 Zeilen abgearbeitet sind, einfach das Programm mit Strg + C unterbrechen.
 
+**Eine andere KI ausprobieren:** Das Programm bietet die Möglichkeit, zwischen unterschiedlichen KI-Anbietern und Modellen zu wechseln. Dabei können sehr unterschiedliche Antworten herauskommen.
+
 **Viele graue Marker auf der Landkarte:** Wahrscheinlich sind viele Schulen noch ohne Schultyp und werden dann den anderen Farben nicht zugeordnet. Da hilft nur eine manuelle Kontrolle oder ein ganz neuer Autoscan.
 
 <h1>Kauf mir einen Kaffee! </h1>
