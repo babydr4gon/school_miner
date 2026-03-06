@@ -1,9 +1,13 @@
 @echo off
-title Schul-Scanner Pro (Terminal)
+title school_miner (Terminal)
+cd /d "%~dp0"
+
 echo =========================================
-echo  🏫 school_miner Pro - Terminal Version
+echo  🏫 school_miner - Terminal Version
 echo =========================================
 echo.
+
+
 
 REM 1. Pruefen, ob Python installiert ist
 python --version >nul 2>&1
@@ -28,8 +32,7 @@ echo [2/3] Pruefe auf Updates fuer benoetigte Pakete...
 python -m pip install --upgrade pip >nul 2>&1
 pip install -r requirements.txt >nul 2>&1
 
-REM 5. Skript starten (Ersetze 'main.py' mit dem Namen deiner Konsolen-Datei!)
+REM 5. Skript starten 
 echo [3/3] Starte Skript...
 echo.
 python school_miner.py
-
