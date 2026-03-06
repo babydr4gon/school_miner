@@ -10,7 +10,9 @@ from urllib.parse import urljoin, urlparse
 from dotenv import load_dotenv
 import shutil 
 import webbrowser
-import sys
+import logging
+import traceback
+
 
 from openai import OpenAI
 from google import genai
@@ -33,9 +35,9 @@ load_dotenv()
 CONFIG_FILE = "config.json"
 
 DEFAULT_SCHULTYPEN = ["Grundschule", "Hauptschule", "Realschule", "Gymnasium", "Gesamtschule", "Förderschule", "Berufsschule", "Verbundschule", "Mittelstufenschule", "Oberstufengymnasium"]
-DEFAULT_HARD_KEYWORDS = ["MINT", "Sport", "Musik", "Gesellschaftswissenschaften", "Sprachen", "bilingual", "themenorientiert", "Multikultur", "Charakter", "Montessori", "Walldorf", "jahrgangsübergreifend", "altersübergreifend", "Ganztag"]
+DEFAULT_HARD_KEYWORDS = ["MINT", "Sport", "Musik", "Gesellschaftswissenschaften", "Sprachen", "bilingual", "Lernlabor", "Lernloft", "Lernatelier", "themenorientiert", "Makerspace", "Multikultur", "Charakter", "Montessori", "Walldorf", "Jenaplan", "jahrgangsübergreifend", "altersübergreifend", "Ganztag"]
 
-PRIORITY_LINKS_L1 = ["Schulprofil", "Schulprogramm", "Leitbild", "Über uns", "Unsere Schule", "Wir über uns"]
+PRIORITY_LINKS_L1 = ["Schulprofil", "Profil", "Schulprogramm", "Leitbild", "Über uns", "Unsere Schule", "Wir über uns"]
 PRIORITY_LINKS_L2 = ["Leitbild", "Konzept", "Pädagogik", "Schwerpunkte", "Ganztag", "Angebote", "AGs", "Förderung"]
 
 DEFAULT_CONFIG = {
@@ -47,22 +49,25 @@ DEFAULT_CONFIG = {
     "GEMINI_MODEL": "gemini-2.0-flash-exp", 
     "OPENROUTER_MODEL": "meta-llama/llama-3.3-70b-instruct", 
     "GROQ_MODEL": "llama-3.3-70b-versatile",
-    "WAIT_TIME": 2.0, 
+    "WAIT_TIME": 5.0, 
     "SENSITIVITY": "normal", 
     "SCHULTYPEN_LISTE": DEFAULT_SCHULTYPEN,
     "KEYWORD_LISTE": DEFAULT_HARD_KEYWORDS,
     "AI_PRIORITY": ["openai", "gemini", "groq", "openrouter"],
     "MANUAL_RESUME_IDX": 0,
     "PROMPT_TEMPLATE": (
-        "Du bist ein Schul-Analyst. Ich gebe dir Textauszüge von der Webseite.\n"
-        "Fasse das pädagogische Konzept zusammen.\n"
-        "Ignoriere Navigationstext.\n"
-        "Maximal 3 Sätze.\n\n"
-        "Text:\n{text}"
+        "Du bist ein Analyst für Schulprofile. Analysiere den folgenden Webseiten-Text. Erstelle eine Zusammenfassung in exakt 2 bis 3 Sätzen. Text: {text}"
     ),
     
     "ERROR_MARKERS": ["Nicht gefunden", "Keine Daten", "KI-Fehler", "QUOTA", "Error", "Zu wenige Infos", "Strict Filter", "Nicht erreichbar"]
 }
+
+# --- LOGGING SETUP ---
+logging.basicConfig(
+    filename='scanner_error.log',
+    level=logging.ERROR,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 def load_config():
     cfg = DEFAULT_CONFIG.copy()
@@ -220,7 +225,7 @@ def load_data():
 
 def save_data(data):
     try:
-        # 1. Sicherheits-Backup der alten Datei erstellen (falls existent)
+        # 1. Sicherheits-Backup der alten Datei erstellen 
         if os.path.exists(CONFIG["OUTPUT_FILE"]):
             try:
                 shutil.copy(CONFIG["OUTPUT_FILE"], CONFIG["OUTPUT_FILE"] + ".bak")
@@ -230,7 +235,7 @@ def save_data(data):
         pd.DataFrame(data).to_excel(CONFIG["OUTPUT_FILE"], index=False)
     except Exception as e:
         print(f"❌ KRITISCHER FEHLER beim Speichern: {e}")
-        # Versuchen, wenigstens das Backup zurückzuspielen, falls der Schreibvorgang die Datei zerstört hat
+        # Versuchen, wenigstens das Backup zurückzuspielen
         if os.path.exists(CONFIG["OUTPUT_FILE"] + ".bak"):
             print("   -> Stelle alte Version wieder her, um Datenverlust zu minimieren.")
             shutil.copy(CONFIG["OUTPUT_FILE"] + ".bak", CONFIG["OUTPUT_FILE"])
@@ -238,24 +243,57 @@ def save_data(data):
 def sync_with_source(current_data):
     print("\n🔄 Sync mit Ursprungsdatei...")
     if not os.path.exists(CONFIG["INPUT_FILE"]): 
-        print(f"❌ Datei {CONFIG['INPUT_FILE']} fehlt."); return current_data
+        print(f"❌ Datei {CONFIG['INPUT_FILE']} fehlt.")
+        return current_data
+        
     try:
         df_raw = pd.read_excel(CONFIG["INPUT_FILE"], header=None)
-        existing = {str(d['schulname']).strip() for d in current_data}
-        added = 0
+        
+        # Aktuelle Daten temporär in einen DataFrame wandeln
+        df_current = pd.DataFrame(current_data) if current_data else pd.DataFrame(columns=['schulname', 'ort', 'schultyp', 'keywords', 'webseite', 'ki_zusammenfassung'])
+        
+        # Composite Key (Name + Ort) aufbauen
+        if not df_current.empty:
+            existing_keys = set(zip(
+                df_current['schulname'].astype(str).str.strip().str.lower(),
+                df_current['ort'].astype(str).str.strip().str.lower()
+            ))
+        else:
+            existing_keys = set()
+            
+        new_rows = []
         for _, row in df_raw.iterrows():
             if len(row) <= max(CONFIG["COLUMN_NAME_IDX"], CONFIG["COLUMN_ORT_IDX"]): continue
-            n = str(row[CONFIG["COLUMN_NAME_IDX"]]).strip()
-            if len(n) > 4 and "schule" in n.lower() and "=" not in n and n not in existing:
-                current_data.append({
-                    'schulname': n, 'ort': str(row[CONFIG["COLUMN_ORT_IDX"]]).strip(),
+            
+            name = str(row[CONFIG["COLUMN_NAME_IDX"]]).strip()
+            ort = str(row[CONFIG["COLUMN_ORT_IDX"]]).strip()
+            key = (name.lower(), ort.lower())
+            
+            # Überprüfen, ob die Schule neu ist
+            if len(name) > 4 and "schule" in name.lower() and "=" not in name and key not in existing_keys:
+                new_rows.append({
+                    'schulname': name, 'ort': ort,
                     'schultyp': "", 'keywords': "", 
                     'webseite': "Nicht gefunden", 'ki_zusammenfassung': "Keine Daten"
                 })
-                existing.add(n); added += 1
-        if added: save_data(current_data); print(f"✅ {added} neue Schulen.")
-        else: print("ℹ️ Keine neuen Einträge.")
-    except Exception as e: print(f"❌ Sync-Fehler: {e}")
+                existing_keys.add(key)
+                
+        # Zusammenführen via pd.concat
+        if new_rows:
+            df_new = pd.DataFrame(new_rows)
+            df_final = pd.concat([df_current, df_new], ignore_index=True)
+            
+            # Zurück in die Listen-Struktur für die weitere Verarbeitung schreiben
+            current_data.clear()
+            current_data.extend(df_final.to_dict('records'))
+            save_data(current_data)
+            print(f"✅ {len(new_rows)} neue Schulen angefügt.")
+        else:
+            print("ℹ️ Keine neuen Einträge gefunden.")
+            
+    except Exception as e: 
+        print(f"❌ Sync-Fehler: {e}")
+        
     return current_data
 
 # --- CRAWLER LOGIC ---
@@ -269,31 +307,85 @@ def search_ddg_robust(query, max_retries=3):
             
             for res in results:
                 url = res['href']
-                # FILTER: Keine Wikipedia, keine Facebook/Instagram Seiten wenn möglich
+                # FILTER
                 if "wikipedia.org" in url or "facebook.com" in url or "instagram.com" in url:
                     continue
                 return url
         except: time.sleep(1.5)
     return None
 
-def get_selenium_content(driver, url):
+def get_selenium_content(driver, url, wait_time=2.0):
+    """Lädt die Seite, scrollt für Lazy-Loading und extrahiert Text/Links (auch versteckte!)."""
     try:
         driver.get(url)
-        time.sleep(1.5)
+        time.sleep(wait_time / 2)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(wait_time / 2)
+        
         title = driver.title
         body = driver.find_element(By.TAG_NAME, "body").text
         links = []
+        
         for elem in driver.find_elements(By.TAG_NAME, "a"):
-            try: links.append((elem.get_attribute("href"), elem.text.lower()))
-            except: continue
+            try: 
+                href = elem.get_attribute("href")
+                
+                #  textContent liest auch eingeklappte Dropdown-Menüs!
+                link_text = elem.get_attribute("textContent")
+                
+                # alls textContent unerwartet leer ist
+                if not link_text:
+                    link_text = elem.text
+                    
+                if href and link_text: 
+                    # keine Leerzeichen/Zeilenumbrüchen
+                    clean_text = " ".join(link_text.split()).lower()
+                    links.append((href, clean_text))
+            except: 
+                continue
+                
         return title, body, links
-    except: return "", "", []
+    except Exception as e: 
+        return "", "", []
 
 def find_school_type_in_text(text):
+    """
+    Sucht nach Schultypen mit einem "Rückspiegel", 
+    um False-Positives (z.B. "nach der Grundschule") auszufiltern.
+    Greift direkt auf die globale CONFIG zu.
+    """
     found = set()
-    text_lower = text.lower()
-    for st in CONFIG["SCHULTYPEN_LISTE"]:
-        if st.lower() in text_lower: found.add(st)
+    
+    # Typische Text-Fallen, die darauf hindeuten, dass eine andere Schule gemeint ist
+    fallen = [
+        r"nach\s+der\s+", 
+        r"von\s+der\s+", 
+        r"über\s+die\s+"
+        r"über\s+Ihre\s+"
+        r"übergang\s+(von|aus)\s+(der)?\s*", 
+        r"kooperation\s+mit\s+(der|einer)?\s*",
+        r"schüler(innen)?\s+der\s+",
+        r"abgänger(innen)?\s+der\s+"
+    ]
+    
+    for styp in CONFIG["SCHULTYPEN_LISTE"]:
+        # Finde ALLE Vorkommen dieses Schultyps im Text
+        matches = list(re.finditer(re.escape(styp), text, re.IGNORECASE))
+        
+        for match in matches:
+            # Hole die 35 Zeichen VOR dem gefundenen Schultyp
+            start_idx = max(0, match.start() - 35)
+            context_before = text[start_idx:match.start()].lower()
+            
+            # Prüfe, ob eine der Fallen im Kontext davor auftaucht
+            is_falle = any(re.search(falle, context_before) for falle in fallen)
+            
+            # Wenn auch nur ein Vorkommen KEINE Falle ist, 
+            # ist es ein echter Treffer -> speichern und zum nächsten Typ wechseln!
+            if not is_falle:
+                found.add(styp)
+                break 
+                
     return list(found)
 
 def validate_page_strict(text):
@@ -343,10 +435,9 @@ def validate_page_strict(text):
     return False
 
 def crawl_and_analyze(driver, school_input, school_ort):
-    # 1. INPUT CHECK: Ist es ein Name oder schon eine URL?
     if school_input.startswith("http"):
         url = school_input
-        is_manual_url = True # Merker für "Deep Mode"
+        is_manual_url = True 
     else:
         url = search_ddg_robust(f"{school_input} {school_ort} Startseite")
         is_manual_url = False
@@ -355,20 +446,17 @@ def crawl_and_analyze(driver, school_input, school_ort):
     
     print(f"      -> URL: {url} {'(Deep Scan)' if is_manual_url else ''}")
     
-    # 2. Seite laden
-    title_main, text_main, links_main = get_selenium_content(driver, url)
+    wait_time = CONFIG.get("WAIT_TIME", 2.0)
+    title_main, text_main, links_main = get_selenium_content(driver, url, wait_time)
+    
     if not text_main: return "Nicht erreichbar", "", "", ""
     
-    # --- STRICT MODE CHECK ---
-    # Bei manueller URL weniger streng, da Deep-Links oft kein "Wir sind eine..." enthalten
     if CONFIG["SENSITIVITY"] == "strict" and not is_manual_url:
         is_valid = validate_page_strict(text_main)
         if not is_valid:
             print("      🛑 Strict Mode: Seite abgelehnt.")
             return url, "", "", ""
-    # -------------------------
-    
-    # 3. Schultyp & Keywords auf aktueller Seite suchen
+            
     found_types = find_school_type_in_text(title_main + "\n" + text_main)
     found_kws = set()
     chunks = [f"--- Seite 1 ({title_main}) ---\n{text_main[:2500]}"]
@@ -379,59 +467,88 @@ def crawl_and_analyze(driver, school_input, school_ort):
 
     scan(text_main)
     
-    # 4. Deep Scan 
     domain = urlparse(url).netloc
     l1_targets = []
     
     for href, txt in links_main:
-        if href and domain in urlparse(href).netloc:
+        if not href: continue
+        
+        # absolute Links (https://.../profil)
+        full_url = urljoin(url, href)
+        
+        
+        if domain in urlparse(full_url).netloc:
             txt_low = txt.lower()
-            
-            # A) Standard-Links 
             if any(p.lower() in txt_low for p in PRIORITY_LINKS_L1):
-                l1_targets.append(href)
-            
-            # B) DEEP SCAN LOGIK (Nur bei manueller URL)
-           
+                l1_targets.append(full_url) # WICHTIG: Die volle URL speichern!
             elif is_manual_url:
-                # Filtert Müll raus (Impressum, Login, etc.), nimmt aber den Rest
                 blocklist = ["impressum", "datenschutz", "login", "anmelden", "kontakt", "sitemap"]
                 if not any(b in txt_low for b in blocklist) and len(txt) > 2:
-                    l1_targets.append(href)
+                    l1_targets.append(full_url)
 
-    # Dubletten entfernen und limitieren
-    # Bei Manuell bis zu 3 Unterseiten scannen
-    scan_list = list(dict.fromkeys(l1_targets))[:3]
+    scan_list = list(dict.fromkeys(l1_targets))[:5]
     
     for l1 in scan_list:
-        print(f"      -> Scan Deep: {l1}")
-        t1, text1, links1 = get_selenium_content(driver, l1)
+        print(f"      -> Scan Deep: {l1}") # (Nur für CLI wichtig)
+        t1, text1, links1 = get_selenium_content(driver, l1, wait_time)
         if text1:
             scan(text1)
             chunks.append(f"--- {t1} ---\n{text1[:2500]}")
             if not found_types: found_types.extend(find_school_type_in_text(text1))
             
-            # Falls wir im Auto-Modus sind, scannen wir hier normalerweise Level 2.
-            # Im Deep-Modus (Manuell) reicht uns Level 1,
-            # Wenn wir aber noch keine Keywords haben, schauen wir kurz rein.
-            if not found_kws and not is_manual_url:
-                 l2_urls = [h for h, t in links1 if h and domain in urlparse(h).netloc and any(p.lower() in t for p in PRIORITY_LINKS_L2)]
-                 for l2 in list(dict.fromkeys(l2_urls))[:2]:
-                    # print(f"         -> Scan L2: {l2}") # Optional für weniger Output
-                    t2, text2, _ = get_selenium_content(driver, l2)
+            if not is_manual_url:
+                 l2_urls = []
+                 for h, t in links1:
+                     if h:
+                         # TRICK auch für Level 2 anwenden!
+                         full_h = urljoin(l1, h)
+                         if domain in urlparse(full_h).netloc and any(p.lower() in t for p in PRIORITY_LINKS_L2):
+                             l2_urls.append(full_h)
+                 
+                 for l2 in list(dict.fromkeys(l2_urls))[:3]:
+                    t2, text2, _ = get_selenium_content(driver, l2, wait_time)
                     if text2:
                         scan(text2)
                         chunks.append(f"--- {t2} ---\n{text2[:2500]}")
 
     schultyp_final = ", ".join(sorted(list(set(found_types))))
-
     return url, schultyp_final, ", ".join(sorted(list(found_kws))), "\n\n".join(chunks)
+
+def is_entry_empty(entry, config):
+    """
+    Prüft, ob ein Eintrag bearbeitet werden muss. 
+    Berücksichtigt dabei auch 'nan'-Strings aus Excel/Pandas.
+    """
+    # Bereinigt Werte von NaN und Leerzeichen
+    def clean(val):
+        v = str(val).strip().lower()
+        return "" if v in ["nan", "none", "null", ""] else v
+
+    schultyp = clean(entry.get('schultyp', ""))
+    keywords = clean(entry.get('keywords', ""))
+    ki = clean(entry.get('ki_zusammenfassung', ""))
+    
+    #  Ist eines der Felder nach der Bereinigung leer?
+    if not schultyp or not keywords or not ki:
+        return True
+        
+    # Enthält der KI-Text einen Fehler-Marker?
+    markers = [m.lower() for m in config.get("ERROR_MARKERS", [])]
+    if any(m in ki for m in markers):
+        return True
+        
+    return False
 
 # --- KI ---
 
 def ki_analyse(context_text):
     if not context_text or len(context_text) < 50: return "Keine Daten"
-    prompt = CONFIG["PROMPT_TEMPLATE"].format(text=context_text[:15000])
+    
+    # 1. Text bereinigen 
+    clean_context = re.sub(r'\n\s*\n', '\n', context_text)
+    
+    # 2. Limit vervierfachen! (60.000 Zeichen statt 15.000)
+    prompt = CONFIG["PROMPT_TEMPLATE"].format(text=clean_context[:60000])
 
     for provider in CONFIG["AI_PRIORITY"]:
         provider = provider.lower()
@@ -453,7 +570,7 @@ def ki_analyse(context_text):
 def generate_map(data):
     print("\n🗺️  Erstelle Landkarte (mit Fallback-Suche)...")
     
-    # Wichtig: User-Agent muss eindeutig sein
+    # User-Agent muss eindeutig sein
     geolocator = Nominatim(user_agent=f"schul_scanner_{int(time.time())}")
     
     # Karte zentrieren (Deutschland Mitte)
@@ -521,25 +638,23 @@ def generate_map(data):
             schultyp = str(entry.get('schultyp', 'Unbekannt'))
             ki = str(entry.get('ki_zusammenfassung', 'Keine Analyse'))
             kw = str(entry.get('keywords', '-'))
-            
-            # --- FARB-LOGIK ---
-            st = schultyp.lower()
+            st_lower = schultyp.lower()
             full_text_scan = (ki + " " + kw).lower()
-            
-            begabung_keywords = ["hochbegabt", "hochbegabte", "begabte", "akzeleration"]
-            
-            # Zuordnung 
-            if any(word in full_text_scan for word in begabung_keywords):
+        
+            # Farb-Logik mit Wortstämmen für Beugungen
+            trigger_stems = ["hochbegab", "begabung", "begabt", "akzeleration"]
+        
+            if any(stem in full_text_scan for stem in trigger_stems): 
                 color = "purple"
-            elif "gesamtschule" in st:
+            elif "gesamtschule" in st_lower: 
                 color = "green"
-            elif "gymnasium" in st and ("haupt" in st or "real" in st or "verbund" in st):
-                color = "orange" 
-            elif "gymnasium" in st:
+            elif "gymnasium" in st_lower and ("haupt" in st_lower or "real" in st_lower or "verbund" in st_lower): 
+                color = "orange"
+            elif "gymnasium" in st_lower: 
                 color = "blue"
-            elif "realschule" in st:
+            elif "realschule" in st_lower: 
                 color = "red"
-            else:
+            else: 
                 color = "gray"
             
             # --- POPUP HTML ---
@@ -648,50 +763,79 @@ def menu_settings():
 
 def run_auto_scan(data):
     print(f"\n🤖 AUTO-SCAN V13.1 (Safe Mode) | Sensibilität: {CONFIG['SENSITIVITY'].upper()}")
-    print("ℹ️ Drücke STRG+C, um zu pausieren.")
+    
+    start_idx = CONFIG.get("AUTO_RESUME_IDX", 0)
+    if start_idx >= len(data): start_idx = 0
+    
+    print(f"ℹ️ Start bei Zeile {start_idx + 1} von {len(data)}. Drücke STRG+C zum Pausieren.")
     
     driver = get_driver()
-    unsaved_changes = False # Merken, ob wir was zu speichern haben
+    unsaved_changes = False 
     
     try:
-        for i, entry in enumerate(data):
-            # Überspringe bereits bearbeitete Einträge
-            if entry.get('ki_zusammenfassung') not in ["", "Keine Daten", None] and entry.get('schultyp') != "": 
-                continue 
+        for i in range(start_idx, len(data)):
+            entry = data[i]
+            CONFIG["AUTO_RESUME_IDX"] = i
+            
+            if not is_entry_empty(entry, CONFIG):
+                continue
             
             print(f"\n[{i+1}/{len(data)}] {entry['schulname']}...")
             
-            url, typ, kw, ctx = crawl_and_analyze(driver, entry['schulname'], entry['ort'])
-            
-            entry['webseite'] = url; entry['schultyp'] = typ; entry['keywords'] = kw
-            unsaved_changes = True
+            # --- DER SCHUTZSCHILD: Jeder einzelne Scan wird abgesichert ---
+            try:
+                url, typ, kw, ctx = crawl_and_analyze(driver, entry['schulname'], entry['ort'])
+                
+                entry['webseite'] = url; entry['schultyp'] = typ; entry['keywords'] = kw
+                unsaved_changes = True
 
-            print(f"      -> Typ: {typ if typ else '-'}")
-            print(f"      -> KW:  {kw if kw else '-'}")
+                print(f"      -> Typ: {typ if typ else '-'}")
+                print(f"      -> KW:  {kw if kw else '-'}")
 
-            if (typ or kw) and ctx:
-                if CONFIG["SENSITIVITY"] == "strict" and not ctx:
-                    entry['ki_zusammenfassung'] = "Zu wenige Infos (Strict Filter)"
+                if (typ or kw) and ctx:
+                    if CONFIG["SENSITIVITY"] == "strict" and not ctx:
+                        entry['ki_zusammenfassung'] = "Zu wenige Infos (Strict Filter)"
+                    else:
+                        print("      🧠 Kontext gefunden -> KI...")
+                        entry['ki_zusammenfassung'] = ki_analyse(ctx)
                 else:
-                    print("      🧠 Kontext gefunden -> KI...")
-                    entry['ki_zusammenfassung'] = ki_analyse(ctx)
-            else:
-                entry['ki_zusammenfassung'] = "Zu wenige Infos (Strict Filter)" if CONFIG["SENSITIVITY"] == "strict" else "Keine relevanten Daten gefunden"
-            
-            # SICHERHEITS-UPDATE: Nur alle 10 Schulen speichern (oder bei der allerletzten)
+                    entry['ki_zusammenfassung'] = "Zu wenige Infos (Strict Filter)" if CONFIG["SENSITIVITY"] == "strict" else "Keine relevanten Daten gefunden"
+                
+            except Exception as inner_e:
+                # Fehler abfangen, ins Log schreiben und einfach weitermachen!
+                print(f"      ⚠️ Fehler bei dieser Schule! Überspringe... (Siehe Log)")
+                error_msg = f"Fehler bei Index {i} ({entry.get('schulname')}):\n{traceback.format_exc()}"
+                logging.error(error_msg)
+                
+                # Wir markieren den Eintrag als fehlerhaft, damit wir ihn später filtern können
+                entry['ki_zusammenfassung'] = "Absturz während des Scans" 
+                continue # Springt sofort zur nächsten Schule
+            # --- ENDE SCHUTZSCHILD ---
+
             if (i + 1) % 10 == 0:
                 print("      💾 Zwischenspeicherung (Backup & Save)...")
                 save_data(data)
+                save_config_to_file(CONFIG)
                 unsaved_changes = False
             
     except KeyboardInterrupt:
-        print("\n🛑 PAUSE durch Benutzer! Speichere Fortschritt...")
+        print("\n🛑 PAUSE durch Benutzer! Speichere den exakten Stand...")
         save_data(data)
+        save_config_to_file(CONFIG)
         unsaved_changes = False
+    except Exception as fatal_e:
+        
+        print(f"\n🚨 KRITISCHER FEHLER! Skript wurde abgebrochen. Details im Log.")
+        logging.critical(f"Kritischer Systemabsturz:\n{traceback.format_exc()}")
     finally:
-        if unsaved_changes: # Falls beim Absturz/Ende noch was offen war
+        if unsaved_changes:
             print("💾 Letzte Änderungen werden gespeichert...")
             save_data(data)
+        
+        if CONFIG.get("AUTO_RESUME_IDX", 0) >= len(data) - 1:
+            CONFIG["AUTO_RESUME_IDX"] = 0
+            
+        save_config_to_file(CONFIG)
         if driver: driver.quit()
 
 def run_manual_review(data):
@@ -715,9 +859,7 @@ def run_manual_review(data):
             
             # Index für den nächsten Start merken & speichern
             CONFIG["MANUAL_RESUME_IDX"] = i
-            # Wir speichern die Config nur alle paar Einträge oder beim Skip/Edit, 
-            # um die Festplatte zu schonen.
-            
+                        
             # --- TRIGGER LOGIK ---
             ki_text = str(entry.get('ki_zusammenfassung', ''))
             typ_text = str(entry.get('schultyp', ''))
@@ -787,8 +929,7 @@ def run_manual_review(data):
                         
                         print(f"   🤖 Starte Deep-Scan für: {u}")
                         # Wir übergeben die URL direkt als erstes Argument.
-                        # Die Funktion erkennt "http" und überspringt die Google-Suche,
-                        # führt aber das volle Programm (Validierung + Unterseiten-Scan) durch.
+                        
                         url, typ, kw, ctx = crawl_and_analyze(driver, u, entry['ort'])
                         
                         # Ergebnisse übernehmen
@@ -851,7 +992,7 @@ def run_single_edit(data):
     print("\n✏️ EINZELNE ZEILE BEARBEITEN")
     row = input("👉 Zeilennummer (aus Excel/Liste): ").strip()
     if not row.isdigit(): return
-    idx = int(row) - 2 # Header ist Zeile 1, Index start bei 0 -> -2 ist meist korrekt bei Excel
+    idx = int(row) - 2 # Header ist Zeile 1, Index start bei 0
     
     if 0 <= idx < len(data):
         e = data[idx]
