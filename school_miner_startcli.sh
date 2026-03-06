@@ -53,5 +53,4 @@ pip install -r requirements.txt &> /dev/null
 echo "[3/3] Starte school_miner..."
 
 # --- 6. START ---
-# Wir nutzen den Python-Interpreter aus dem venv
 ./clivenv/bin/python3 school_miner.py
