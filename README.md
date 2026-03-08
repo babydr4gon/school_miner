@@ -20,7 +20,7 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
    ```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
    ```
-**Schulliste anlegen:** Eine Liste mit Schulnamen und Adressen herunterladen und unter "schulen.xlsx" abspeichern. Das Skript erwartet, dass sich der Name der Schue in der Spalte A und der Ort in Spalte C befinden. Wer das ändern möchte, muss im Code folgende Angaben anpassen (0 ist A und 2 ist C): 
+**Schulliste anlegen:** Eine Liste mit Schulnamen und Adressen herunterladen und unter "schulen.xlsx" abspeichern. Das Skript erwartet, dass sich der Name der Schule in der Spalte A und der Ort in Spalte C befinden. Wer das ändern möchte, muss im Code folgende Angaben anpassen (0 ist A und 2 ist C): 
 
 ```bash
 "COLUMN_NAME_IDX": 0,
@@ -40,12 +40,13 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
 eingeben. Falls es dabei unter Windows Fehlermeldungen gibt, dass die Installation zwar erfolgreich aber "not on PATH" war, muss gegebenenfalls noch eine System-Einstellung verändert werden. Wie das geht, steht <a href="https://www.geeksforgeeks.org/python/how-to-add-python-to-windows-path/">hier</a>. 
 
 
-**API-Keys** in einer Datei namens .env im gleichen Ordner hinterlegen. Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen.
-   ```bash
+**API-Keys** in einer Datei namens .env im gleichen Ordner hinterlegen. 
+
+```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
    ```
 
-**Schulliste anlegen:** Eine Liste mit Schulnamen und Adressen herunterladen und unter "schulen.xlsx" abspeichern. Das Skript erwartet, dass sich der Name der Schue in der Spalte A und der Ort in Spalte C befinden. Wer das ändern möchte, muss im Code folgende Angaben anpassen (0 ist A und 2 ist C): 
+**Schulliste anlegen:** Eine Liste mit Schulnamen und Adressen herunterladen und unter "schulen.xlsx" abspeichern. Das Skript erwartet, dass sich der Name der Schule in der Spalte A und der Ort in Spalte C befinden. Wer das ändern möchte, muss im Code folgende Angaben anpassen (0 ist A und 2 ist C): 
 
 ```bash
 "COLUMN_NAME_IDX": 0,
@@ -95,7 +96,7 @@ Nach dem Start erscheint folgende Übersicht:
 
 **Karte erstellen:** Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule auf der Basis der Ergebnisliste.
 
-**Sync mit Input-Datei:** Das Skript überprüft, wie viele Schulen aus der Quelldatei bereits abgearbeitet wurden.
+**Sync mit Input-Datei:** Das Skript überprüft, wie viele Schulen aus der Quelldatei bereits abgearbeitet wurden bzw. ob neue Schulen hinzugekommen sind.
 
 **Einstellungen:** Hier kann man die Grundeinstellungen verändern.
 
@@ -123,7 +124,7 @@ Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollstä
 
 <h1>Tipps und Tricks </h1>
 
-Die meisten Schulwebseiten sind...schlecht. Viele dieser Seiten sind entweder veraltet oder ziemlich zusammengestückelt. Deshalb muss man, wenn man erfolgreich Informationen sammeln will, etwas Zeit und Mühe investieren. Dazu folgende Ideen:
+Schulwebseiten zu scannen ist eine Herausforderung. Viele dieser Seiten sind entweder veraltet oder ziemlich zusammengestückelt. Deshalb muss man, wenn man erfolgreich Informationen sammeln will, etwas Zeit und Mühe investieren. Dazu folgende Ideen:
 
 **Mit einer kleinen Testliste anfangen:** Es hat sich bewährt, zunächst höchstens 10 Schulen als Quelle zu nehmen und das Programm ein paar Mal mit verschiedenen Keywords und einem individuell gestalteten Prompt durchlaufen zu lassen. Sehr unterschiedlich wirkt es sich beispielsweise aus, die Sensibilität von "strict" auf "normal" zu stellen. Dann tauchen zwar plötzlich vielleicht ein paar Zeitungsberichte in der Suche auf, aber da stehen manchmal auch ganz interessante Sachen über die gesuchte Schule drin. Die Keywordliste zu erweitern kann dafür sorgen, dass das Skript auf Unterseiten der Schulhomepage Dinge findet, die sonst verloren gegangen wären.
 
@@ -136,7 +137,7 @@ Die meisten Schulwebseiten sind...schlecht. Viele dieser Seiten sind entweder ve
 **Viele graue Marker auf der Landkarte:** Wahrscheinlich sind viele Schulen noch ohne Schultyp und werden dann den anderen Farben nicht zugeordnet. Da hilft nur eine manuelle Kontrolle oder ein ganz neuer Autoscan.
 
 <h1>Kauf mir einen Kaffee! </h1>
-Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-). Ich freue mnich darüber.
+Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-). Ich freue mich darüber.
 
 <p align="center">
   <a href="https://www.buymeacoffee.com/gernotzumc2" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 90px !important;width: 324px !important;"></a>
