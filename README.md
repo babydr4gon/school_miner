@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/dragon_mine.png" alt="School_miner icon" width="400" height="400"/>
+  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/assets/images/dragon_mine.png" alt="School_miner icon" width="400" height="400"/>
   <br>
   School_Miner
 </h1>
@@ -78,7 +78,7 @@ Das Skript wird für jede der Schulen in dieser Liste nach der offiziellen Webse
 
 Am Ende wird  eine Tabelle mit den Ergebnissen der Suche erstellt. Darin stehen der Name und der Ort der Schule, die gefundenen Keywords, die verwendete Webseite und die Zusammenfassung der KI. Es gibt die Möglichkeit, Fehler, die bei der automatisierten Suche passieren, individuell zu korrigieren. 
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Karte.jpg" alt="Landkarte" width="650" height="650"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/assets/images/Karte.jpg" alt="Landkarte" width="650" height="650"/>
 
 Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkarte sind die Schulen mit Markern eingezeichnet. Klickt man auf einen der Marker, erscheint eine kurze Übersicht: der Name der Schule, die gefundenen Keywords und die KI-Zusammenfassung. 
 
@@ -86,7 +86,7 @@ Abschließend kann man sich eine Landkarte erstellen lassen. Auf dieser Landkart
 
 Nach dem Start erscheint folgende Übersicht:
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Start.jpg" alt="Hauptmenü" width="650" height="650"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/assets/images/Start.jpg" alt="Hauptmenü" width="650" height="650"/>
 
 **AutoScan:** die vorbereitete Liste der Schulen wird automatisch, Zeile für Zeile abgearbeitet.
 
