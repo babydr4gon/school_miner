@@ -15,7 +15,8 @@ Eine fast funktionsgleiche Version, die im Browser genutzt werden kann, befindet
 
 **Repository klonen** oder als ZIP herunterladen und entpacken.
 
-**API Key:** Die Datei .env.example in .env umbenennen und API-Keys hinter dem Gleichheitszeichen einfügen.  Ohne API-Key läuft das Skript auch, liefert aber keine KI-Zusammenfassungen.
+**API Key:** Die Datei .env.example in .env umbenennen und API-Keys hinter dem Gleichheitszeichen einfügen.
+
    ```bash
    OPENROUTER_API_KEY=dein_schluessel_hier
    ```
@@ -70,7 +71,7 @@ Alternativ einen Terminal / eine Eingabeaufforderung starten und in den Ordner w
 
 In allen Bundesländern gibt es Listen mit Namen und Adressen der Schulen. Sie werden  in der Regel von den Kultusministerien oder von den statistischen Landesämtern gepflegt.
 
-Diese Listen muss man für die eigenen Bedürfnisse anpassen, also beispielsweise die Schulen rauslöschen, die geographisch zu weit weg sind. Voreingestellt ist als Name für diese Liste "schulen.xlsx". 
+Diese Listen muss man für die eigenen Bedürfnisse anpassen, also beispielsweise die Schulen löschen, die geographisch zu weit weg sind. Voreingestellt ist als Name für diese Liste "schulen.xlsx". 
 
 Das Skript wird für jede der Schulen in dieser Liste nach der offiziellen Webseite suchen. Dort identifiziert es den Schultyp und erkennt bestimmte Keywords. Sobald es diese Dinge gefunden hat, versucht eine KI die gefundenen Informationen zum Konzept oder zu Besonderheiten der Schule in wenigen Sätzen zusammenzufassen. 
 
@@ -94,7 +95,7 @@ Nach dem Start erscheint folgende Übersicht:
 
 **Karte erstellen:** Hier erstellt das Skript eine Landkarte mit Markierungen für jede Schule auf der Basis der Ergebnisliste.
 
-**Sync mit Input-Datei:** Das Skript überprüft, wieviele Schulen aus der Quelldatei bereits abgearbeitet wurden.
+**Sync mit Input-Datei:** Das Skript überprüft, wie viele Schulen aus der Quelldatei bereits abgearbeitet wurden.
 
 **Einstellungen:** Hier kann man die Grundeinstellungen verändern.
 
@@ -102,7 +103,7 @@ Nach dem Start erscheint folgende Übersicht:
 
 <h3>Die manuelle Kontrolle</h3>
 
-Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollständig sein. Mit der manuellen Kontrolle lässt sich hier nacharbeiten. Das Programm sucht nach leeren Stellen in der Ergebnisliste, zeigt die bisher gefundenen Informatioen zu einer Schule an und öffnet die bisher gespeicherte Webseite. All diese Dinge kann der Nutzer im Rahmen der manuellen Kontrolle jetzt ändern.
+Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollständig sein. Mit der manuellen Kontrolle lässt sich hier nacharbeiten. Das Programm sucht nach leeren Stellen in der Ergebnisliste, zeigt die bisher gefundenen Informationen zu einer Schule an und öffnet die bisher gespeicherte Webseite. All diese Dinge kann der Nutzer im Rahmen der manuellen Kontrolle jetzt ändern.
 
 **Auto Scan:**: Bei der manuellen Kontrolle bedeutet AutoScan, dass der gewählt Eintrag (und nicht etwa die ganze Liste) noch einmal mit den vorgegebenen Einstellungen automatisch gescannt wird. Das ist zum Beispiel dann sinnvoll, wenn eine Webseite beim ersten Durchlauf nicht erreichbar war.
 
