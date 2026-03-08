@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://github.com/wiemachendiedasnur/school_miner/blob/assets/images/dragon_mine.png" alt="School_miner icon" width="400" height="400"/>
+  <img src="https://github.com/babydr4gon/school_miner/blob/assets/images/dragon_mine.png" alt="School_miner icon" width="400" height="400"/>
   <br>
   School_Miner
 </h1>
