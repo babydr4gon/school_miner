@@ -110,7 +110,7 @@ Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollstä
 
 **KI-Check wiederholen:** Nur das Feld "KI-Zusammenfassung" wird noch einmal bearbeitet, durch eine erneute Abfrage mit den bisher gefundenen Daten und den aktuellen Einstellungen.
 
-<img src="https://github.com/wiemachendiedasnur/school_miner/blob/main/images/Manuell.jpg" alt="Manuelle Kontrolle" width="650" height="650"/>
+<img src="https://github.com/wiemachendiedasnur/school_miner/blob/assets/images/Manuell.jpg" alt="Manuelle Kontrolle" width="650" height="650"/>
 
 **URL Paste:** Falls beim ersten Durchlauf eine falsche Webadresse gefunden wurde, lässt sich das hier korrigieren. Anschließend läuft der komplette AutoScan für diesen Eintrag noch einmal durch.
 
