@@ -578,14 +578,15 @@ def generate_map(data):
     
     # 1. LEGENDE 
     legend_html = '''
-     <div style="position: fixed; bottom: 50px; right: 50px; width: 200px; height: 160px; border:2px solid grey; z-index:9999; font-size:14px; background-color:white; opacity:0.9; padding: 10px;">
+     <div style="position: fixed; bottom: 50px; right: 50px; width: 200px; height: 180px; border:2px solid grey; z-index:9999; font-size:14px; background-color:white; opacity:0.9; padding: 10px;">
      <b>Legende</b><br>
      <i style="color:purple" class="fa fa-map-marker"></i> Begabtenförderung<br>
      <i style="color:blue" class="fa fa-map-marker"></i> Gymnasium<br>
      <i style="color:green" class="fa fa-map-marker"></i> Gesamtschule<br>
      <i style="color:orange" class="fa fa-map-marker"></i> Mix (Gym/HR)<br>
      <i style="color:red" class="fa fa-map-marker"></i> Realschule<br>
-     <i style="color:gray" class="fa fa-map-marker"></i> Sonstige/Förder<br>
+     <i style="color:gray" class="fa fa-map-marker"></i> Grundschule<br>
+     <i style="color:beige" class="fa fa-map-marker"></i> Sonstige/Förder<br>
      </div>
      '''
     m.get_root().html.add_child(Element(legend_html))
@@ -598,8 +599,8 @@ def generate_map(data):
     for i, entry in enumerate(data):
         name = entry.get('schulname', ''); ort = entry.get('ort', '')
         
-        # Ignoriere Einträge komplett ohne Daten/URL
-        if not name or not entry.get('webseite') or entry.get('webseite') == "Nicht gefunden": 
+        # NEUER FILTER: Ignoriere nur Einträge komplett ohne Namen
+        if not name: 
             continue
         
         try:
@@ -608,7 +609,6 @@ def generate_map(data):
             is_approx = False
             
             # Versuch 1: Exakte Suche (Schule + Ort)
-            # Bereinigung, alles in Klammern weg
             clean_name = re.sub(r"\(.*?\)", "", name).strip()
             query = f"{clean_name}, {ort}, Germany"
             loc = geolocator.geocode(query, timeout=10)
@@ -617,20 +617,16 @@ def generate_map(data):
                 lat, lon = loc.latitude, loc.longitude
             else:
                 # Versuch 2: NUR ORT (Fallback)
-                # Wenn Schule nicht gefunden, nimm die Stadtmitte
                 loc_city = geolocator.geocode(f"{ort}, Germany", timeout=10)
                 if loc_city:
                     lat = loc_city.latitude
                     lon = loc_city.longitude
-                    # Zufälliger "Jitter" (Verschiebung), damit Marker nicht stapeln
-                    # ca. 500m - 1km Umkreis
                     lat += random.uniform(-0.015, 0.015) 
                     lon += random.uniform(-0.015, 0.015)
                     is_approx = True
             
-            # Wenn immer noch keine Koordinaten -> Überspringen
             if not lat or not lon:
-                print(f"   ❌ Ort nicht gefunden: {ort}")
+                print(f"   ❌ Ort nicht gefunden: {ort} (Schule: {name})")
                 missing_count += 1
                 continue
 
@@ -641,7 +637,7 @@ def generate_map(data):
             st_lower = schultyp.lower()
             full_text_scan = (ki + " " + kw).lower()
         
-            # Farb-Logik mit Wortstämmen für Beugungen
+            # Farb-Logik 
             trigger_stems = ["hochbegab", "begabung", "begabt", "akzeleration"]
         
             if any(stem in full_text_scan for stem in trigger_stems): 
@@ -654,11 +650,19 @@ def generate_map(data):
                 color = "blue"
             elif "realschule" in st_lower: 
                 color = "red"
-            else: 
+            elif "grundschule" in st_lower: 
                 color = "gray"
+            else: 
+                color = "beige"
+            
+            # --- WEBSEITEN-LINK LOGIK ---
+            web_link = entry.get('webseite', '')
+            if web_link and web_link != "Nicht gefunden" and web_link.startswith("http"):
+                link_html = f'<a href="{web_link}" target="_blank" style="background-color:#007bff;color:white;padding:3px 8px;text-decoration:none;border-radius:3px;font-size:11px">Webseite öffnen</a>'
+            else:
+                link_html = '<span style="color:red; font-style:italic; font-size:11px;">(Keine Webseite hinterlegt)</span>'
             
             # --- POPUP HTML ---
-            # Hinweis hinzufügen, wenn Position nur geschätzt ist
             pos_hint = "<br><i style='color:red; font-size:10px'>(Position geschätzt/Stadtmitte)</i>" if is_approx else ""
             
             html = f"""
@@ -671,12 +675,12 @@ def generate_map(data):
                     {ki}
                 </div>
                 <br>
-                <a href="{entry.get('webseite','#')}" target="_blank" style="background-color:#007bff;color:white;padding:3px 8px;text-decoration:none;border-radius:3px;font-size:11px">Webseite</a>
+                {link_html}
             </div>
             """
             
             # Marker setzen
-            icon_type = "info-sign" if not is_approx else "question-sign" # Anderes Icon für geschätzte Position
+            icon_type = "info-sign" if not is_approx else "question-sign"
             folium.Marker(
                 [lat, lon], 
                 popup=folium.Popup(html, max_width=350), 
@@ -690,7 +694,7 @@ def generate_map(data):
                 print(f"   ... {count} Schulen platziert ...")
                 
             # WICHTIG: Höflichkeitspause für OSM (sonst blockieren sie dich)
-            time.sleep(1.2) 
+            time.sleep(2.2) 
             
         except Exception as e:
             # Fehler ausgeben, statt pass
