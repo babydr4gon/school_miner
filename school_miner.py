@@ -44,6 +44,7 @@ DEFAULT_CONFIG = {
     "INPUT_FILE": "schulen.xlsx",
     "OUTPUT_FILE": "schulen_ergebnisse.xlsx",
     "MAP_FILE": "schulen_karte.html",
+    "MAP_DELAY": 1.7,  
     "COLUMN_NAME_IDX": 0,
     "COLUMN_ORT_IDX": 2,
     "GEMINI_MODEL": "gemini-2.0-flash-exp", 
@@ -597,10 +598,12 @@ def generate_map(data):
     print("   (Dieser Schritt kann dauern, um die OSM-Server nicht zu überlasten...)")
 
     for i, entry in enumerate(data):
-        name = entry.get('schulname', ''); ort = entry.get('ort', '')
+        # in String umwandeln und Leerzeichen entfernen
+        name = str(entry.get('schulname', '')).strip()
+        ort = str(entry.get('ort', '')).strip()
         
-        # NEUER FILTER: Ignoriere nur Einträge komplett ohne Namen
-        if not name: 
+        # Ignoriere komplett leere oder 'nan' Einträge
+        if not name or name.lower() == 'nan': 
             continue
         
         try:
@@ -689,13 +692,16 @@ def generate_map(data):
             
             count += 1
             
+            
+            
             # Fortschritt alle 50 Schulen anzeigen
             if count % 50 == 0:
                 print(f"   ... {count} Schulen platziert ...")
                 
-            # WICHTIG: Höflichkeitspause für OSM (sonst blockieren sie dich)
-            time.sleep(2.2) 
-            
+            # WICHTIG: Höflichkeitspause für OSM dynamisch aus der Config
+            delay = CONFIG.get("MAP_DELAY", 1.5)
+            time.sleep(delay) 
+
         except Exception as e:
             # Fehler ausgeben, statt pass
             print(f"   ⚠️ Fehler bei {name}: {e}")
@@ -741,7 +747,8 @@ def menu_settings():
         print(f"4: KI-Priorität   {CONFIG['AI_PRIORITY']}")
         print(f"5: Prompt Text")
         print(f"6: Sensibilität   [{CONFIG['SENSITIVITY'].upper()}]")
-        print("7: Zurück")
+        print(f"7: Map Pause      [{CONFIG.get('MAP_DELAY', 1.5)} Sek.]") # <-- NEU
+        print("8: Zurück")
         
         c = input("👉 Wahl: ").strip()
         if c == "1": CONFIG["INPUT_FILE"] = input("Datei: ")
@@ -755,12 +762,16 @@ def menu_settings():
             new_p = input("Neuer Text (Enter = behalten): ")
             if len(new_p) > 10: CONFIG["PROMPT_TEMPLATE"] = new_p
         elif c == "6":
-            print("\nModus wählen:")
-            print("  normal = Akzeptiert alle gefundenen Seiten")
-            print("  strict = Prüft auf 'Wir sind eine...' / 'Leitbild' etc.")
-            new_s = input(f"  Aktuell: {CONFIG['SENSITIVITY']} -> Neu (normal/strict): ").strip().lower()
+            print("\nModus wählen: normal / strict")
+            new_s = input(f"  Aktuell: {CONFIG['SENSITIVITY']} -> Neu: ").strip().lower()
             if new_s in ["normal", "strict"]: CONFIG["SENSITIVITY"] = new_s
-        elif c == "7": save_config_to_file(CONFIG); break
+        elif c == "7": # <-- NEU
+            new_delay = input(f"Neue Pause in Sek. (Aktuell {CONFIG.get('MAP_DELAY', 1.5)}): ").strip()
+            try: 
+                CONFIG["MAP_DELAY"] = float(new_delay)
+            except ValueError:
+                print("Bitte eine gültige Zahl eingeben (z.B. 2.0).")
+        elif c == "8": save_config_to_file(CONFIG); break
         save_config_to_file(CONFIG)
 
 # --- RUNNERS ---
