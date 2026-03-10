@@ -122,6 +122,22 @@ Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollstä
 
 **Reset des Indexes:** Das Programm merkt sich, an welcher Stelle in der Liste die manuelle Kontrolle zuletzt abgebrochen wurde und beginnt beim nächsten Mal genau bei diesem Eintrag. Sollte man aber komplett noch einmal von vorne beginnen wollen, kann man den Merkindex hier auf 0 zurücksetzen.
 
+<h3>Einstellungen</h3>
+
+**Input Datei:** Hier die Quelldatei eintragen. Voreingestellt ist schulen.xlsx
+
+**Schultypen:** Viele Schulformen sind bereits in der Voreinstellung erfasst. In manchen Bundesländern gibt es aber Sonderformen oder besondere Namen für einzelne Schulformen. Dann hier nachtragen.
+
+**Keywords:** Die Schlüsselwörter sind wichtig um auf den Webseiten zentrale Teile herauszufiltern. 
+
+**KI-Priorität:** Die einzelnen KI-Anbieter werden in der hier festgelegten Reihenfolge abgefragt. 
+
+**Prompt Text:** Der Auftrag an die KI-Anbieter mit der zentralen Fragestellung zu den einzelnen Schulen.
+
+**Sensibilität:** Bei der Sensibilität "normal" wird nur geprüft, ob auf einer Webseite der Name und der Ort der Schule enthalten sind. Bei "strict" kommen weitere Bedingungen dazu. Das kann dazu führen, dass manchmal keine Webseite gefunden wird. In anderen Fällen führt "strict" dazu, dass das Skript genauer unterscheiden kann zwischen der echten Schulwebseite und einem Zeitungsartikel über eine Schule.
+
+**Map Pause:** Bei der Erstellung der Landkarte sorgen zu viele Anfragen an den OSM-Server dafür, dass man blockiert wird. Die Pauseneinstellung soll das verhindern. Wenn diese Zeit nicht reicht, einfach erhöhen.
+
 <h1>Tipps und Tricks </h1>
 
 Schulwebseiten zu scannen ist eine Herausforderung. Viele dieser Seiten sind entweder veraltet oder ziemlich zusammengestückelt. Deshalb muss man, wenn man erfolgreich Informationen sammeln will, etwas Zeit und Mühe investieren. Dazu folgende Ideen:
