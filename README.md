@@ -152,6 +152,16 @@ Schulwebseiten zu scannen ist eine Herausforderung. Viele dieser Seiten sind ent
 
 **Viele beige Marker auf der Landkarte:** Wahrscheinlich sind viele Schulen noch ohne Schultyp und werden dann den anderen Farben nicht zugeordnet. Da hilft nur eine manuelle Kontrolle oder ein ganz neuer Autoscan.
 
+<h1>Deinstallation</h1>
+
+Wer das Programm über die beiliegenden Start-Skripte (.bat für Windows oder .sh für Linux) genutzt hat, muss einfach nur den gesamten Projektordner löschen.
+
+Fortgeschrittene Nutzer, die das Programm manuell über das Terminal installiert haben: Wer die Module händisch ohne virtuelle Umgebung installiert hat, bei dem liegen diese im globalen Python-Ordner des Systems. Um sie zu entfernen, einen Terminal in diesem Ordner öffnen und folgenden Befehl eingeben, und zwar bevor der Projektordner gelöscht wird:
+
+  ```bash
+  pip uninstall -r requirements.txt -y
+   ```
+
 <h1>Kauf mir einen Kaffee! </h1>
 Wem diese Arbeit gefallen hat oder wer einfach nur einen Nutzen von dem Programm hat, der darf mir gerne einen Kaffee kaufen :-). Ich freue mich darüber.
 
