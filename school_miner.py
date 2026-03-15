@@ -50,7 +50,8 @@ DEFAULT_CONFIG = {
     "GEMINI_MODEL": "gemini-2.0-flash-exp", 
     "OPENROUTER_MODEL": "meta-llama/llama-3.3-70b-instruct", 
     "GROQ_MODEL": "llama-3.3-70b-versatile",
-    "WAIT_TIME": 5.0, 
+    "WAIT_TIME": 2.0, 
+    "HEADLESS": True,
     "SENSITIVITY": "normal", 
     "SCHULTYPEN_LISTE": DEFAULT_SCHULTYPEN,
     "KEYWORD_LISTE": DEFAULT_HARD_KEYWORDS,
@@ -146,12 +147,18 @@ def print_system_status():
 
 # --- SELENIUM DRIVER ---
 
-def get_driver():
-    print("   🔌 Starte Browser-Engine...", end="\r")
-
+def get_driver(headless=True):
+    
+    is_headless = CONFIG.get("HEADLESS", True)
+    
     chrome_options = Options()
-    # "--headless=new" scheinbar stabiler als das alte "--headless"
-    chrome_options.add_argument("--headless=new") 
+    
+    if is_headless:
+        chrome_options.add_argument("--headless=new")
+        print("🕵️ Browser läuft unsichtbar im Hintergrund. Ändern in config.json Headless=False")
+    else:
+        print("🖥️ Sichtbarer Modus aktiv: Browser wird geöffnet. Ändern in config.json Headless=True")
+        
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
@@ -1108,4 +1115,15 @@ def main():
             print("\n(Im Hauptmenü: '7' zum Beenden)")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print("\n" + "="*50)
+        print("💥 KRITISCHER FEHLER BEIM START:")
+        print(e)
+        print("="*50)
+        import traceback
+        traceback.print_exc() # Zeigt dir genau die Zeilennummer
+        print("\nDas Fenster schließt sich erst nach Drücken der Enter-Taste...")
+        input("Drücke Enter zum Beenden...")
+        
