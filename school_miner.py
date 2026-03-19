@@ -277,10 +277,14 @@ def sync_with_source(current_data):
             
             name = str(row[CONFIG["COLUMN_NAME_IDX"]]).strip()
             ort = str(row[CONFIG["COLUMN_ORT_IDX"]]).strip()
+            
+            # Wir fangen 'nan' (leere Zellen) ab
+            if name.lower() == 'nan': continue
+            
             key = (name.lower(), ort.lower())
             
-            # Überprüfen, ob die Schule neu ist
-            if len(name) > 4 and "schule" in name.lower() and "=" not in name and key not in existing_keys:
+            # KORREKTUR: "schule"-Zwang ist weg. Längenprüfung auf > 2 reduziert.
+            if len(name) > 2 and "=" not in name and key not in existing_keys:
                 new_rows.append({
                     'schulname': name, 'ort': ort,
                     'schultyp': "", 'keywords': "", 
@@ -882,10 +886,11 @@ def run_manual_review(data):
     print(f"\n🕵️ MANUELLE KONTROLLE (Lückenfüller)")
     print(f"ℹ️  Start bei Zeile {start_idx + 1} von {len(data)}.")
     if start_idx > 0:
-        print(f"   (Nutze Option [7], um wieder ganz von vorne zu beginnen)")
+        print(f"   (Nutze Option [10], um wieder ganz von vorne zu beginnen)")
     
     driver = None
     found_count = 0
+    filter_mode = "all" # <-- NEU: Standardmäßig suchen wir nach allem, was fehlt
     
     try:
         for i in range(start_idx, len(data)):
@@ -894,19 +899,35 @@ def run_manual_review(data):
             # Index für den nächsten Start merken & speichern
             CONFIG["MANUAL_RESUME_IDX"] = i
                         
-            # --- TRIGGER LOGIK ---
-            ki_text = str(entry.get('ki_zusammenfassung', ''))
-            typ_text = str(entry.get('schultyp', ''))
-            keyw_text = str(entry.get('keywords', ''))
-            is_error_ki = any(m in ki_text for m in CONFIG["ERROR_MARKERS"])
-            is_empty_ki = len(ki_text) < 10
-            is_empty_typ = len(typ_text) < 3
+            # --- TRIGGER LOGIK (FIXED NaN BUG) ---
+            def clean_val(v):
+                s = str(v).strip()
+                return "" if s.lower() == "nan" else s
+
+            ki_text = clean_val(entry.get('ki_zusammenfassung', ''))
+            typ_text = clean_val(entry.get('schultyp', ''))
+            keyw_text = clean_val(entry.get('keywords', ''))
             
-            if not is_error_ki and not is_empty_ki and not is_empty_typ:
-                continue
+            # Fehlerhaft wenn Error-Marker drin ist ODER der Text extrem kurz ist
+            is_error_ki = any(m in ki_text for m in CONFIG["ERROR_MARKERS"]) or len(ki_text) < 10
+            is_empty_typ = len(typ_text) < 3
+            is_empty_kw = len(keyw_text) < 3
+            
+            # --- NEUE FILTER-WEICHE ---
+            
+            # --- NEUE FILTER-WEICHE ---
+            if filter_mode == "all":
+                # Standard: Halte an, wenn Typ ODER KI fehlt (Keywords lassen wir hier optional)
+                if not is_error_ki and not is_empty_typ:
+                    continue
+            elif filter_mode == "typ":
+                if not is_empty_typ: continue
+            elif filter_mode == "kw":
+                if not is_empty_kw: continue
+            elif filter_mode == "ki":
+                if not is_error_ki: continue
 
             found_count += 1
-            
             
             # --- 3. ANZEIGE ---
             print(f"\n[{i+1}/{len(data)}] 🏫 {entry['schulname']} ({entry['ort']})")
@@ -922,19 +943,24 @@ def run_manual_review(data):
             else:
                 print(f"   KI:   {ki_text[:50]}...")
             
-            #Browser zur Kontrolle öffnen    
+            # Browser zur Kontrolle öffnen    
             open_browser_search(f"{entry['schulname']} {entry['ort']} Startseite")
             
             # --- 4. INTERAKTION ---
             while True:
-                print("\n   [1] Auto-Scan (Komplett neu suchen)")
-                print("   [2] KI-Check wiederholen (Bypass Strict Filter)")
-                print("   [3] URL Paste (Link manuell setzen)")
-                print("   [4] Typ manuell nachtragen")
-                print("   [5] Keywords manuell nachtragen")
-                print("   [6] Skip (Diesen Eintrag überspringen)")
-                print("   [7] Reset des Indexes. Suche beginnt wieder oben in der Liste)")
-                print("   [8] Exit (Zurück zum Menü)")
+                print("\n   [1] Auto-Scan - Aktuell ausgewählte Schule komplett neu scannen")
+                print("   [2] Nur KI-Check bei aktuell gewählter Schule wiederholen")
+                print("   [3] Neue URL für aktuell gewählte Schule einfügen und scannen")
+                print("   [4] Schultyp(en) für aktuell gewählte Schule nachtragen")
+                print("   [5] Neue Keywords für aktuell gewählte Schule")
+                print("   --------------------------------------------------------")
+                print("   [6] Durchsuche Liste nach Schulen ohne Schultyp")
+                print("   [7] Durchsuche Liste nach Schulen ohne Keywords")
+                print("   [8] Durchsuche Liste nach Schulen ohne KI")
+                print("   --------------------------------------------------------")
+                print("   [9] Skip (Diesen Eintrag überspringen)")
+                print("   [10] Reset des Indexes (Suche beginnt wieder oben)")
+                print("   [11] Exit (Zurück zum Menü)")
                 
                 c = input("   👉 Wahl: ").strip()
                 
@@ -956,20 +982,14 @@ def run_manual_review(data):
                         save_data(data)
                     break
 
-                elif c == "3": # URL Paste (Via Deep-Scan)
+                elif c == "3": 
                     u = input("   🔗 URL eingeben: ").strip()
                     if u.startswith("http"):
                         if not driver: driver = get_driver()
-                        
                         print(f"   🤖 Starte Deep-Scan für: {u}")
-                        # Wir übergeben die URL direkt als erstes Argument.
-                        
                         url, typ, kw, ctx = crawl_and_analyze(driver, u, entry['ort'])
                         
-                        # Ergebnisse übernehmen
                         entry['webseite'] = url
-                        
-                        # Nur überschreiben, wenn auch was gefunden wurde, sonst behalten was da war
                         if typ: entry['schultyp'] = typ
                         if kw: entry['keywords'] = kw
                         
@@ -979,39 +999,53 @@ def run_manual_review(data):
                             print("   ✅ Analyse erfolgreich.")
                         else:
                             print("   ⚠️ URL geladen, aber 'crawl_and_analyze' hat keine Inhalte validiert.")
-                            print("      (Möglicherweise hat der Strict-Filter den Ort nicht im Impressum gefunden)")
                             entry['ki_zusammenfassung'] = "Inhalt abgelehnt (Strict Filter)"
                         
                         save_data(data)
                     break
+                    
                 elif c == "4":
                     new_typ = input(f"   ✍️ Typ ({entry.get('schultyp')}): ").strip()
                     if new_typ: entry['schultyp'] = new_typ
-                    
                     save_data(data); break
                 
                 elif c == "5":
-                    new_kw = input(f"Keywords ({entry.get('keywords')}): ").strip()
+                    new_kw = input(f"   ✍️ Keywords ({entry.get('keywords')}): ").strip()
                     if new_kw: entry['keywords'] = new_kw
-                    
                     save_data(data); break
 
-                elif c == "6": # SKIP
+                # --- NEUE FILTER-FUNKTIONEN ---
+                elif c == "6":
+                    filter_mode = "typ"
+                    print("   🔍 Wechsle Filter: Suche ab jetzt nach Schulen ohne Schultyp...")
+                    break
+                    
+                elif c == "7":
+                    filter_mode = "kw"
+                    print("   🔍 Wechsle Filter: Suche ab jetzt nach Schulen ohne Keywords...")
+                    break
+                    
+                elif c == "8":
+                    filter_mode = "ki"
+                    print("   🔍 Wechsle Filter: Suche ab jetzt nach Schulen ohne KI-Analyse...")
+                    break
+
+                # --- ALTE SKIP/RESET/EXIT FUNKTIONEN (angepasste Nummern) ---
+                elif c == "9": 
                     print("   ⏭️ Merke Position und gehe weiter...")
-                    save_config_to_file(CONFIG) # Position sichern
+                    save_config_to_file(CONFIG) 
                     break
                 
-                elif c == "8": # EXIT
-                    save_config_to_file(CONFIG)
-                    return 
-
-                elif c == "7": # RESET
+                elif c == "10": 
                     CONFIG["MANUAL_RESUME_IDX"] = 0
                     save_config_to_file(CONFIG)
                     print("   ♻️ Index zurückgesetzt. Beim nächsten Start geht es bei 1 los.")
+                    
+                elif c == "11": 
+                    save_config_to_file(CONFIG)
+                    return 
 
-        # Wenn wir am Ende der Liste angekommen sind
-        print("\n✅ Ende der Liste erreicht.")
+        print("\n✅ Ende der Liste erreicht (oder keine weiteren Treffer für diesen Filter gefunden).")
         CONFIG["MANUAL_RESUME_IDX"] = 0
         save_config_to_file(CONFIG)
 
