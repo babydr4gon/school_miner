@@ -106,17 +106,33 @@ Nach dem Start erscheint folgende Übersicht:
 
 Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollständig sein. Mit der manuellen Kontrolle lässt sich hier nacharbeiten. Das Programm sucht nach leeren Stellen in der Ergebnisliste, zeigt die bisher gefundenen Informationen zu einer Schule an und öffnet die bisher gespeicherte Webseite. All diese Dinge kann der Nutzer im Rahmen der manuellen Kontrolle jetzt ändern.
 
-**Auto Scan:**: Bei der manuellen Kontrolle bedeutet AutoScan, dass der gewählt Eintrag (und nicht etwa die ganze Liste) noch einmal mit den vorgegebenen Einstellungen automatisch gescannt wird. Das ist zum Beispiel dann sinnvoll, wenn eine Webseite beim ersten Durchlauf nicht erreichbar war.
+print("\n   [1] Auto-Scan - Aktuell ausgewählte Schule komplett neu scannen")
+                print("   [2] Nur KI-Check bei aktuell gewählter Schule wiederholen")
+                print("   [3] Neue URL für aktuell gewählte Schule einfügen und scannen")
+                print("   [4] Schultyp(en) für aktuell gewählte Schule nachtragen")
+                print("   [5] Neue Keywords für aktuell gewählte Schule")
+                print("   --------------------------------------------------------")
+                print("   [6] Durchsuche Liste nach Schulen ohne Schultyp")
+                print("   [7] Durchsuche Liste nach Schulen ohne Keywords")
+                print("   [8] Durchsuche Liste nach Schulen ohne KI")
 
-**KI-Check wiederholen:** Nur das Feld "KI-Zusammenfassung" wird noch einmal bearbeitet, durch eine erneute Abfrage mit den bisher gefundenen Daten und den aktuellen Einstellungen.
+**Auto-Scan - Aktuell ausgewählte Schule komplett neu scannen:**: Im Rahmen der manuellen Kontrolle bedeutet AutoScan, dass der gewählt Eintrag (und nicht etwa die ganze Liste) noch einmal mit den vorgegebenen Einstellungen automatisch gescannt wird. Das ist zum Beispiel dann sinnvoll, wenn eine Webseite beim ersten Durchlauf nicht erreichbar war.
+
+**Nur KI-Check bei aktuell gewählter Schule wiederholen:** Nur das Feld "KI-Zusammenfassung" wird noch einmal bearbeitet, durch eine erneute Abfrage mit den bisher gefundenen Daten und den aktuellen Einstellungen.
 
 <img src="https://github.com/wiemachendiedasnur/school_miner/blob/assets/images/Manuell.jpg" alt="Manuelle Kontrolle" width="650" height="650"/>
 
-**URL Paste:** Falls beim ersten Durchlauf eine falsche Webadresse gefunden wurde, lässt sich das hier korrigieren. Anschließend läuft der komplette AutoScan für diesen Eintrag noch einmal durch.
+**Neue URL für aktuell gewählte Schule einfügen und scannen:** Falls beim ersten Durchlauf eine falsche Webadresse gefunden wurde, lässt sich das hier korrigieren. Anschließend läuft der komplette AutoScan für diesen Eintrag noch einmal durch.
 
-**Typ manuell nachtragen:** Hier kann der Schultyp verändert werden.
+**Schultyp(en) für aktuell gewählte Schule nachtragen:** Hier kann der Schultyp verändert werden.
 
-**Keywords manuell nachtragen:** Eigene Schlüsselwörter eintragen.
+**Neue Keywords für aktuell gewählte Schule:** Eigene Schlüsselwörter eintragen.
+
+**Durchsuche Liste nach Schulen ohne Schultyp:** Hier kann man die Logik einstellen, nach der bei der manuellen Kontrolle der nächste Eintrag ausgewählt wird. In diesem Fall wird die nächste Schule ausgewählt, bei der in der Ergebnisliste noch kein Schultyp zugeordnet ist und das entsprechende Feld leer ist.
+
+**Durchsuche Liste nach Schulen ohne Schultyp:** Auch hier kann man die Logik einstellen, nach der bei der manuellen Kontrolle der nächste Eintrag ausgewählt wird. In diesem Fall wird die nächste Schule ausgewählt, bei der in der Ergebnisliste noch keine Keywords zugeordnet sind und das entsprechende Feld leer ist.
+
+**Durchsuche Liste nach Schulen ohne KI:** Auch hier kann man die Logik einstellen, nach der bei der manuellen Kontrolle der nächste Eintrag ausgewählt wird. In diesem Fall wird die nächste Schule ausgewählt, bei der in der Ergebnisliste noch kein KI-Eintrag zugeordnet ist und das entsprechende Feld leer ist.
 
 **Skip:** Einen Eintrag überspringen, z.B. weil er zwar unvollständig, aber auch unwichtig ist.
 
