@@ -167,7 +167,15 @@ def get_driver(headless=True):
     # Unterdrückt unnötige USB-Fehlermeldungen in der Konsole
     chrome_options.add_argument("--log-level=3") 
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-
+    
+    # DOWNLOADS KOMPLETT BLOCKIEREN 
+    prefs = {
+        "download_restrictions": 3,              # 3 = Blockiert ausnahmslos alle Downloads
+        "download.prompt_for_download": False,   # Verhindert Pop-ups
+        "plugins.always_open_pdf_externally": False # Verhindert, dass PDFs an externe Viewer geschickt werden
+    }
+    chrome_options.add_experimental_option("prefs", prefs)
+    
     driver = None
     
     # --- VERSUCH 1: Automatisch (Standard für Windows/Mac) ---
