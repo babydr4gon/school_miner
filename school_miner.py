@@ -345,7 +345,10 @@ def get_selenium_content(driver, url, wait_time=2.0):
         time.sleep(wait_time / 2)
         
         title = driver.title
-        body = driver.find_element(By.TAG_NAME, "body").text
+        body_text = driver.find_element(By.TAG_NAME, "body").text
+        
+        kombinierter_text = f"{title}\n\n{body_text}"
+        
         links = []
         
         for elem in driver.find_elements(By.TAG_NAME, "a"):
@@ -366,7 +369,7 @@ def get_selenium_content(driver, url, wait_time=2.0):
             except: 
                 continue
                 
-        return title, body, links
+        return title, body, kombinierter_text, links
     except Exception as e: 
         return "", "", []
 
