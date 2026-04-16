@@ -106,16 +106,6 @@ Nach dem Start erscheint folgende Übersicht:
 
 Nach dem ersten Durchlauf der Schulliste werden einige Einträge noch unvollständig sein. Mit der manuellen Kontrolle lässt sich hier nacharbeiten. Das Programm sucht nach leeren Stellen in der Ergebnisliste, zeigt die bisher gefundenen Informationen zu einer Schule an und öffnet die bisher gespeicherte Webseite. All diese Dinge kann der Nutzer im Rahmen der manuellen Kontrolle jetzt ändern.
 
-print("\n   [1] Auto-Scan - Aktuell ausgewählte Schule komplett neu scannen")
-                print("   [2] Nur KI-Check bei aktuell gewählter Schule wiederholen")
-                print("   [3] Neue URL für aktuell gewählte Schule einfügen und scannen")
-                print("   [4] Schultyp(en) für aktuell gewählte Schule nachtragen")
-                print("   [5] Neue Keywords für aktuell gewählte Schule")
-                print("   --------------------------------------------------------")
-                print("   [6] Durchsuche Liste nach Schulen ohne Schultyp")
-                print("   [7] Durchsuche Liste nach Schulen ohne Keywords")
-                print("   [8] Durchsuche Liste nach Schulen ohne KI")
-
 **Auto-Scan - Aktuell ausgewählte Schule komplett neu scannen:**: Im Rahmen der manuellen Kontrolle bedeutet AutoScan, dass der gewählt Eintrag (und nicht etwa die ganze Liste) noch einmal mit den vorgegebenen Einstellungen automatisch gescannt wird. Das ist zum Beispiel dann sinnvoll, wenn eine Webseite beim ersten Durchlauf nicht erreichbar war.
 
 **Nur KI-Check bei aktuell gewählter Schule wiederholen:** Nur das Feld "KI-Zusammenfassung" wird noch einmal bearbeitet, durch eine erneute Abfrage mit den bisher gefundenen Daten und den aktuellen Einstellungen.
