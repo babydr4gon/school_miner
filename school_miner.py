@@ -605,7 +605,7 @@ def generate_map(data):
     legend_html = '''
      <div style="position: fixed; bottom: 50px; right: 50px; width: 200px; height: 180px; border:2px solid grey; z-index:9999; font-size:14px; background-color:white; opacity:0.9; padding: 10px;">
      <b>Legende</b><br>
-     <i style="color:purple" class="fa fa-map-marker"></i> Begabtenförderung<br>
+     <i style="color:purple" class="fa fa-map-marker"></i> Bilingual / bilingualer Schwerpunkt<br>
      <i style="color:blue" class="fa fa-map-marker"></i> Gymnasium<br>
      <i style="color:green" class="fa fa-map-marker"></i> Gesamtschule<br>
      <i style="color:orange" class="fa fa-map-marker"></i> Mix (Gym/HR)<br>
@@ -675,7 +675,7 @@ def generate_map(data):
             full_text_scan = (ki + " " + kw).lower()
         
             # Farb-Logik 
-            trigger_stems = ["hochbegab", "begabung", "begabt", "akzeleration"]
+            trigger_stems = ["bilingual", "zweisprachig"]
         
             if any(stem in full_text_scan for stem in trigger_stems): 
                 color = "purple"
@@ -692,9 +692,10 @@ def generate_map(data):
             else: 
                 color = "beige"
             
-            # --- WEBSEITEN-LINK LOGIK ---
-            web_link = entry.get('webseite', '')
-            if web_link and web_link != "Nicht gefunden" and web_link.startswith("http"):
+           # --- WEBSEITEN-LINK LOGIK ---
+            web_link = str(entry.get('webseite', '')).strip() # HIER FIX: Sofort in String umwandeln
+            
+            if web_link and web_link.lower() != 'nan' and web_link != "Nicht gefunden" and web_link.startswith("http"):
                 link_html = f'<a href="{web_link}" target="_blank" style="background-color:#007bff;color:white;padding:3px 8px;text-decoration:none;border-radius:3px;font-size:11px">Webseite öffnen</a>'
             else:
                 link_html = '<span style="color:red; font-style:italic; font-size:11px;">(Keine Webseite hinterlegt)</span>'
